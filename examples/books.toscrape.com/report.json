@@ -1,0 +1,474 @@
+{
+  "schema_version": 1,
+  "url": "https://books.toscrape.com/catalogue/category/books_1/index.html",
+  "host": "books.toscrape.com",
+  "when": "2026-11-13T22:15:01",
+  "elapsed_s": 12.3,
+  "requests": 6,
+  "signature_rules_skipped": 0,
+  "verdict": {
+    "tier": "B",
+    "method": "Plain fetch + parse HTML",
+    "difficulty": "easy",
+    "why": [
+      "the content is in the raw page"
+    ],
+    "effort": "S",
+    "effort_hours": "2-5 h",
+    "effort_bumps": [],
+    "safe_pace": "not tested",
+    "unknowns": [
+      "Safe pace (pace check did not run - see its section).",
+      "Hidden data feeds: browser not used because the raw page looked complete (run with --browser always to hunt for feeds).",
+      "Long-window limits (hourly/daily quotas) - a short test cannot see them.",
+      "How often the data changes (needs watch mode, planned for v2)."
+    ],
+    "claims": [
+      {
+        "claim": "Plain requests get the content",
+        "evidence": "verified",
+        "detail": "found in the raw page"
+      },
+      {
+        "claim": "Site accepts an honest bot identity",
+        "evidence": "verified",
+        "detail": "SiteScout/1.3.0 user agent was served normally"
+      },
+      {
+        "claim": "robots.txt allows the start page",
+        "evidence": "verified",
+        "detail": ""
+      },
+      {
+        "claim": "About 1,000 items exist",
+        "evidence": "seen",
+        "detail": "the site's own count"
+      },
+      {
+        "claim": "Page 2 gives different items",
+        "evidence": "verified",
+        "detail": ""
+      },
+      {
+        "claim": "Every item is reachable by paging",
+        "evidence": "verified",
+        "detail": "the last page served real results"
+      },
+      {
+        "claim": "Safe pace",
+        "evidence": "unknown",
+        "detail": ""
+      }
+    ]
+  },
+  "facts": {
+    "robots_allowed": true,
+    "sitemap_urls": 0,
+    "identity": {
+      "requested": "honest",
+      "used": "honest",
+      "honest_ok": true
+    },
+    "guards": [],
+    "guards_possible": [],
+    "hard_guard": [],
+    "tech": [
+      "jQuery"
+    ],
+    "login_wall": false,
+    "raw_listing": {
+      "count": 20,
+      "container": "section > div > ol.row",
+      "item_selector": "li",
+      "avg_text_chars": 51,
+      "fields": {
+        "link": 1.0,
+        "image": 1.0,
+        "price": 1.0,
+        "date": 0.0
+      },
+      "samples": [
+        "A Light in the ... £51.77 In stock Add to basket",
+        "Tipping the Velvet £53.74 In stock Add to basket",
+        "Soumission £50.10 In stock Add to basket"
+      ],
+      "fragility": {
+        "level": "low",
+        "random_looking_classes": 0,
+        "utility_classes": 60,
+        "meaningful_classes": 270,
+        "stable_attributes": false,
+        "no_classes": false
+      }
+    },
+    "embedded_blocks": [],
+    "embedded_has_items": false,
+    "api_hints": [],
+    "needs_browser": false,
+    "fragility": "low",
+    "items_per_page": 20,
+    "page_template": {
+      "kind": "page",
+      "first": 1,
+      "step": 1,
+      "pattern": "https://books.toscrape.com/catalogue/category/books_1/page-{n}.html",
+      "page1_url": "https://books.toscrape.com/catalogue/category/books_1/index.html"
+    },
+    "paging": [
+      "'next' link"
+    ],
+    "page_links": [],
+    "next_link": "https://books.toscrape.com/catalogue/category/books_1/page-2.html",
+    "total_items": 1000,
+    "pages_needed": 50,
+    "reach": {
+      "page2_ok": true,
+      "last_ok": true,
+      "reachable_items": 1000,
+      "share": 1.0,
+      "evidence": "verified"
+    },
+    "conditional_get": true
+  },
+  "checks": {
+    "robots": {
+      "name": "robots",
+      "title": "Bot rules (robots.txt)",
+      "status": "ok",
+      "findings": {
+        "url": "https://books.toscrape.com/robots.txt",
+        "status": 404,
+        "found": false
+      },
+      "notes": [
+        "No robots.txt rules (missing) - no stated restrictions."
+      ],
+      "warnings": [],
+      "reason": "",
+      "seconds": 1.43
+    },
+    "sitemap": {
+      "name": "sitemap",
+      "title": "Sitemap (page list)",
+      "status": "ok",
+      "findings": {
+        "found": false
+      },
+      "notes": [
+        "No sitemap found - pages have to be discovered by following links."
+      ],
+      "warnings": [],
+      "reason": "",
+      "seconds": 0.78
+    },
+    "fingerprint": {
+      "name": "fingerprint",
+      "title": "First look: response, guards, technology",
+      "status": "ok",
+      "findings": {
+        "status": 200,
+        "final_url": "https://books.toscrape.com/catalogue/category/books_1/index.html",
+        "redirects": [],
+        "bytes": 50607,
+        "truncated": false,
+        "ms": 643,
+        "content_type": "text/html",
+        "server": null,
+        "powered_by": null,
+        "compression": null,
+        "cache_control": null,
+        "etag": true,
+        "last_modified": true,
+        "cookies": [],
+        "guards": [],
+        "challenge_markers": [],
+        "guards_possible": [],
+        "tech": [
+          "jQuery"
+        ],
+        "lang": "en-us",
+        "login_wall": false
+      },
+      "notes": [
+        "Plain request works: HTTP 200, 49 KB in 643 ms.",
+        "Built with: jQuery.",
+        "Replies carry change markers (ETag/Last-Modified) - see caching check."
+      ],
+      "warnings": [],
+      "reason": "",
+      "seconds": 2.65
+    },
+    "tls": {
+      "name": "tls",
+      "title": "Browser-identity requests (curl_cffi)",
+      "status": "skipped",
+      "findings": {},
+      "notes": [],
+      "warnings": [],
+      "reason": "plain requests already work",
+      "seconds": 0.0
+    },
+    "platform": {
+      "name": "platform",
+      "title": "Platform shortcuts (built-in data feeds)",
+      "status": "skipped",
+      "findings": {},
+      "notes": [],
+      "warnings": [],
+      "reason": "no platform with a known public feed detected",
+      "seconds": 0.0
+    },
+    "embedded": {
+      "name": "embedded",
+      "title": "Data packed inside the page",
+      "status": "ok",
+      "findings": {
+        "blocks": [],
+        "microdata": 0,
+        "opengraph_tags": 0,
+        "unreadable_frameworks": []
+      },
+      "notes": [
+        "No packed data blocks - data has to come from the page layout or a feed."
+      ],
+      "warnings": [],
+      "reason": "",
+      "seconds": 0.06
+    },
+    "location": {
+      "name": "location",
+      "title": "Where the data lives (raw page vs browser)",
+      "status": "ok",
+      "findings": {
+        "expect": {},
+        "raw": {
+          "visible_chars": 2115,
+          "html_bytes": 50607,
+          "script_share": 0.0,
+          "empty_app_shell": false,
+          "listing": {
+            "count": 20,
+            "container": "section > div > ol.row",
+            "item_selector": "li",
+            "avg_text_chars": 51,
+            "fields": {
+              "link": 1.0,
+              "image": 1.0,
+              "price": 1.0,
+              "date": 0.0
+            },
+            "samples": [
+              "A Light in the ... £51.77 In stock Add to basket",
+              "Tipping the Velvet £53.74 In stock Add to basket",
+              "Soumission £50.10 In stock Add to basket"
+            ],
+            "fragility": {
+              "level": "low",
+              "random_looking_classes": 0,
+              "utility_classes": 60,
+              "meaningful_classes": 270,
+              "stable_attributes": false,
+              "no_classes": false
+            }
+          }
+        },
+        "api_hints_in_source": [],
+        "browser_reasons": [],
+        "needs_browser": false
+      },
+      "notes": [
+        "Raw page already has the content - no browser needed (pass --browser always to also hunt for hidden data feeds)."
+      ],
+      "warnings": [],
+      "reason": "",
+      "seconds": 0.06
+    },
+    "network": {
+      "name": "network",
+      "title": "Hidden data feeds",
+      "status": "skipped",
+      "findings": {},
+      "notes": [],
+      "warnings": [],
+      "reason": "browser was not used, no feed hints in source",
+      "seconds": 0.0
+    },
+    "structure": {
+      "name": "structure",
+      "title": "Page structure, paging and fragility",
+      "status": "ok",
+      "findings": {
+        "source": "raw page",
+        "listing": {
+          "count": 20,
+          "container": "section > div > ol.row",
+          "item_selector": "li",
+          "avg_text_chars": 51,
+          "fields": {
+            "link": 1.0,
+            "image": 1.0,
+            "price": 1.0,
+            "date": 0.0
+          },
+          "samples": [
+            "A Light in the ... £51.77 In stock Add to basket",
+            "Tipping the Velvet £53.74 In stock Add to basket",
+            "Soumission £50.10 In stock Add to basket"
+          ],
+          "fragility": {
+            "level": "low",
+            "random_looking_classes": 0,
+            "utility_classes": 60,
+            "meaningful_classes": 270,
+            "stable_attributes": false,
+            "no_classes": false
+          }
+        },
+        "paging": [
+          "'next' link"
+        ],
+        "page_link_examples": [],
+        "next_link": "https://books.toscrape.com/catalogue/category/books_1/page-2.html",
+        "page_template": {
+          "kind": "page",
+          "first": 1,
+          "step": 1,
+          "pattern": "https://books.toscrape.com/catalogue/category/books_1/page-{n}.html",
+          "page1_url": "https://books.toscrape.com/catalogue/category/books_1/index.html"
+        },
+        "load_more_test": {},
+        "total_in_text": 1000,
+        "total_items_claimed": 1000,
+        "pages_needed": 50
+      },
+      "notes": [
+        "Item list: 20 items, selector `li` inside `section > div > ol.row`; items have link, image, price.",
+        "Sample item: \"A Light in the ... £51.77 In stock Add to basket\"",
+        "Fragility: LOW - meaningful class names / stable attributes; a layout scraper should hold up.",
+        "Page addresses follow: https://books.toscrape.com/catalogue/category/books_1/page-{n}.html (page number, page 2 = https://books.toscrape.com/catalogue/category/books_1/page-2.html). Not trusted until the reach check fetches it.",
+        "Paging: 'next' link.",
+        "Site claims about 1,000 items -> about 50 list pages at 20 per page. Use this number later as a coverage check (did we get them all?)."
+      ],
+      "warnings": [],
+      "reason": "",
+      "seconds": 0.03
+    },
+    "reach": {
+      "name": "reach",
+      "title": "Paging and reach (tested)",
+      "status": "ok",
+      "findings": {
+        "pattern": "https://books.toscrape.com/catalogue/category/books_1/page-{n}.html",
+        "per_page": 20,
+        "site_total": 1000,
+        "last_page": 50,
+        "ran_from": "home-pc",
+        "probes": [
+          {
+            "page": 2,
+            "url": "https://books.toscrape.com/catalogue/category/books_1/page-2.html",
+            "status": 200,
+            "bytes": 51015,
+            "items": 20,
+            "range": null,
+            "page_field": null,
+            "verdict": "ok",
+            "why": "20 items, none repeated"
+          },
+          {
+            "page": 50,
+            "url": "https://books.toscrape.com/catalogue/category/books_1/page-50.html",
+            "status": 200,
+            "bytes": 50565,
+            "items": 20,
+            "range": null,
+            "page_field": null,
+            "verdict": "ok",
+            "why": "20 items, none repeated"
+          }
+        ],
+        "page2_ok": true
+      },
+      "notes": [
+        "Page 2 works: 20 items, none repeated (https://books.toscrape.com/catalogue/category/books_1/page-2.html).",
+        "The last page (page 50) still serves real results - every item is reachable by paging."
+      ],
+      "warnings": [],
+      "reason": "",
+      "seconds": 5.76
+    },
+    "caching": {
+      "name": "caching",
+      "title": "Cheap re-checks (change markers)",
+      "status": "ok",
+      "findings": {
+        "headers_sent": [
+          "If-None-Match",
+          "If-Modified-Since"
+        ],
+        "status": 304,
+        "bytes": 0,
+        "works": true
+      },
+      "notes": [
+        "Site answers 'not changed' (304, 0 bytes) instead of resending 49 KB - re-checks can be frequent and cheap."
+      ],
+      "warnings": [],
+      "reason": "",
+      "seconds": 1.45
+    },
+    "pace": {
+      "name": "pace",
+      "title": "Pace check (does the site stay normal?)",
+      "status": "skipped",
+      "findings": {},
+      "notes": [],
+      "warnings": [],
+      "reason": "site already pushed back (page shrank to 0 bytes from 50,607 (soft block))",
+      "seconds": 0.0
+    },
+    "browser_room": {
+      "name": "browser_room",
+      "title": "Browser check (run last, in its own room)",
+      "status": "skipped",
+      "findings": {},
+      "notes": [],
+      "warnings": [],
+      "reason": "nothing was waiting for the browser",
+      "seconds": 0.0
+    }
+  },
+  "config": {
+    "url": "https://books.toscrape.com/catalogue/category/books_1/index.html",
+    "min_delay": 2.0,
+    "max_requests": 60,
+    "max_body_bytes": 8000000,
+    "timeout": 20.0,
+    "start_retries": 2,
+    "start_retry_wait": 5.0,
+    "max_runtime": 600.0,
+    "stop_on_block": true,
+    "browser": "auto",
+    "browser_timeout_ms": 30000,
+    "block_heavy_assets": true,
+    "scroll_rounds": 2,
+    "click_more": 2,
+    "pace": true,
+    "pace_interval": 6.0,
+    "pace_requests": 10,
+    "pace_fast": false,
+    "pace_fast_steps": [
+      3.0,
+      1.5,
+      0.75
+    ],
+    "pace_fast_per_step": 6,
+    "expect": [],
+    "identity": "honest",
+    "proxy": null,
+    "out_dir": "examples/books.toscrape.com",
+    "only": [],
+    "skip": [],
+    "verbose": false
+  }
+}

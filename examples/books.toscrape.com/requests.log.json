@@ -1,0 +1,68 @@
+[
+ {
+  "n": 1,
+  "url": "https://books.toscrape.com/robots.txt",
+  "status": 404,
+  "bytes": 153,
+  "ms": 1431,
+  "purpose": "robots.txt",
+  "identity": "honest",
+  "blocked": null,
+  "error": null
+ },
+ {
+  "n": 2,
+  "url": "https://books.toscrape.com/sitemap.xml",
+  "status": 404,
+  "bytes": 153,
+  "ms": 216,
+  "purpose": "sitemap",
+  "identity": "honest",
+  "blocked": null,
+  "error": null
+ },
+ {
+  "n": 3,
+  "url": "https://books.toscrape.com/catalogue/category/books_1/index.html",
+  "status": 200,
+  "bytes": 50607,
+  "ms": 643,
+  "purpose": "main page",
+  "identity": "honest",
+  "blocked": null,
+  "error": null
+ },
+ {
+  "n": 4,
+  "url": "https://books.toscrape.com/catalogue/category/books_1/page-2.html",
+  "status": 200,
+  "bytes": 51015,
+  "ms": 638,
+  "purpose": "reach p2",
+  "identity": "honest",
+  "blocked": null,
+  "error": null
+ },
+ {
+  "n": 5,
+  "url": "https://books.toscrape.com/catalogue/category/books_1/page-50.html",
+  "status": 200,
+  "bytes": 50565,
+  "ms": 646,
+  "purpose": "reach p50",
+  "identity": "honest",
+  "blocked": null,
+  "error": null
+ },
+ {
+  "n": 6,
+  "url": "https://books.toscrape.com/catalogue/category/books_1/index.html",
+  "status": 304,
+  "bytes": 0,
+  "ms": 220,
+  "purpose": "conditional GET",
+  "identity": "honest",
+  "blocked": "page shrank to 0 bytes from 50,607 (soft block)",
+  "error": null
+ }
+]

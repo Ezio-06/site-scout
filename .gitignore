@@ -6,6 +6,8 @@
 !/tests/
 !/tools/
 !/.gitattributes
+!/examples/
+!/CHANGELOG.md
 !/.gitignore
 !/LICENSE
 !/NOTICE
@@ -16,6 +18,7 @@
 !/scout.bat
 !/setup.bat
 /tests/out/
+/examples/**/snapshots/
 __pycache__/
 *.pyc
 *.egg-info/
