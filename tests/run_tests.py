@@ -146,6 +146,12 @@ def main():
         failed += bool(err)
         print(f"  {'FAIL' if err else 'ok  '}  {name}" + (f": {err}" if err else ""))
     srv.shutdown()
+    if not only:  # standalone landmine scripts
+        import subprocess
+        for script in ["test_robots_identity.py"]:
+            rc = subprocess.run([sys.executable, str(HERE / script)]).returncode
+            failed += bool(rc)
+            print(f"  {'FAIL' if rc else 'ok  '}  {script}")
     print("all passed" if not failed else f"{failed} failed")
     return 1 if failed else 0
 
