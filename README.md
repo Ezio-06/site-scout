@@ -5,6 +5,10 @@
 
 **Give it a link. It visits the site politely and writes a scout card: how to get all the data, how hard it is, how fast you can go. Every claim says how it was checked.**
 
+> **Status: v1.3, early.** On sites built differently from the ones it was tested against, it can still reach a wrong
+> conclusion, occasionally even one marked "verified". Treat a card as a well-sourced starting point and re-check any
+> claim you will quote. Every site that has broken it so far became a test case ([How it's tested](#how-its-tested)).
+
 ## Why it exists
 
 Most recon tools answer "how protected is this site?" Site Scout also answers "how do I get ALL the data?"
@@ -233,6 +237,9 @@ Never call `requests` directly: always go through `ctx.get` so the safety rules 
 - One connection cannot see hourly or daily quotas. The card says so every time.
 - Results hold for the network the scout ran from (shown on the card). Datacenter IPs are often treated differently; re-run from a server before moving a collector there.
 - The holdout result was measured on v1.1, and those sites are no longer a true holdout ([docs/holdout.md](docs/holdout.md)).
+  In real use, new sites still find shapes it does not handle, sometimes as a wrong "verified" claim. A large random-sample
+  benchmark (consistency checks across hundreds of sites plus a blind-labelled subset) is on the roadmap.
+- Future development ideas and how to contribute: [CONTRIBUTING.md](CONTRIBUTING.md).
 - Effort bands are starting guesses, not measured quotes.
 
 Roadmap:

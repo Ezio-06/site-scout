@@ -12,6 +12,7 @@
 !/LICENSE
 !/NOTICE
 !/README.md
+!/CONTRIBUTING.md
 !/pyproject.toml
 !/requirements.txt
 !/run_scout.py
