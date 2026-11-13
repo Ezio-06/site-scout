@@ -180,11 +180,11 @@ difficulty score, and wafw00f is the mature standard for guard identification. S
 
 ```mermaid
 flowchart LR
-    CLI[cli.py] --> R[runner]
-    R --> C1[checks]
-    C1 --> F[fetcher: the one door to the network]
-    F --> S[(site)]
-    C1 --> REP[report: card + report.json]
+    CLI["cli.py"] --> R["runner.py"]
+    R --> C1["checks/ (one file per check)"]
+    C1 --> F["fetcher.py - the one door to the network"]
+    F --> S[("website")]
+    C1 --> REP["report.py - scout card and report.json"]
 ```
 
 ```
