@@ -33,7 +33,7 @@
 "Real sites" are live commercial or public sites; they appear here only as counts.
 
 Where it lost points: the method letter on pages that can be scraped more than one way (most of these were half credit),
-heavily protected real sites that the scout rated as plain fetch instead of guarded, and a few paging and page-2 cases.
+heavily protected real sites where the scout gave method B (plain fetch) instead of D (guarded) even though it detected the guard (the guard check scored 100% out-of-sample), and a few paging and page-2 cases.
 Fifteen sites had at least one miss: 8 out-of-sample and 7 in-sample.
 
 ## Caveats

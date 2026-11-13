@@ -2,7 +2,7 @@
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [1.3.0]
+## [1.3.0] - 2026-11-13
 
 ### Added
 - Guard signature file (171 signatures) used passively against responses already received.
@@ -19,7 +19,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Fixed
 - A crash when robots.txt forbids the start page; the card now has a verdict.
 
-## [1.2.0]
+## [1.2.0] - 2026-11-13
 
 ### Added
 - Honest identity by default (`SiteScout/<version>`), with `--identity browser`.
