@@ -1731,7 +1731,8 @@ def d_check3():
     seen = {"landmine": [], "signature": [], "check": []}
     for name, txt in docs.items():
         for v, ctx in _num_mentions(txt, [r"\b(\d+)\s+(?:[\w-]+\s+){0,2}landmines?\b", r"\b(\d+)-(?:site|case)\s+landmine",
-                                          r"landmines?[\w\s-]{0,25}?\(\s*(\d+)\s*\)"]):
+                                          r"landmines?[\w\s-]{0,25}?\(\s*(\d+)\s*\)",
+                                          r"landmines?[\w\s|-]{0,25}?\|\s*(\d+)\s+(?:cases?|sites?)\b"]):
             seen["landmine"].append((name, v, ctx))
             if int(v) != lm:
                 probs.append(f"{name}: landmine count {v} != {lm} pytest landmine cases ({ctx!r})")
@@ -1911,7 +1912,8 @@ def d_check6():
     rows = holdout_rows()
     lines = txt.splitlines()
     for name, (pct, frac) in rows.items():
-        hit = [ln for ln in lines if "|" in ln and re.search(rf"\b{name}\b", ln, re.I) and frac in ln]
+        name_rx = re.sub(r"([a-z])(\d)", lambda m: m.group(1) + r"[\s-]?" + m.group(2), re.escape(name))  # score.md 'page2' = doc 'page 2'
+        hit = [ln for ln in lines if "|" in ln and re.search(rf"\b{name_rx}\b", ln, re.I) and frac in ln]
         if not hit:
             probs.append(f"no table row for '{name}' with the out-of-sample {pct} ({frac})")
     for rx, what in ((r"95\s?%", "95%"), (r"109\.5\s*/\s*115", "109.5/115"),
