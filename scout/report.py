@@ -350,6 +350,10 @@ def write(ctx, elapsed: float) -> dict:
     add("")
 
     warnings = [(r.title, w) for r in ctx.results.values() for w in r.warnings]
+    if f.get("rules_forbid_start"):   # said from the request log, not from intent
+        n = sum(1 for e in ctx.fetcher.log if e.get("url") == ctx.url)
+        warnings.append(("Start page", "no request was made to it" if n == 0 else
+                         f"the scout DID request it {n} time(s) before the rules were known - see requests.log.json"))
     if warnings:
         add("## Warnings")
         add("")

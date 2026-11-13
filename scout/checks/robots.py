@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from .base import Check
+from ..config import BROWSER_HEADERS
 from ..context import BOT_TOKEN
 
 try:
@@ -23,11 +24,12 @@ class Robots(Check):
         url = ctx.origin + "/robots.txt"
         r = ctx.get(url, purpose="robots.txt")
         if (r.status in (401, 403) or (r.blocked and r.status != 404)) and ctx.fetcher.identity == "honest"                 and ctx.cfg.identity == "honest":
-            # the site may simply refuse bot names: settle the identity first (one labelled
-            # comparison on the start page), then read robots.txt again with whatever works
-            ctx.main_page()
-            if ctx.fetcher.identity == "browser":
-                r = ctx.get(url, purpose="robots.txt (browser identity)", use_cache=False)
+            # robots.txt is unknown for our honest name. Before ANY request under another identity
+            # (the start-page comparison), read the rules the browser identity is shown, and obey them.
+            r2 = ctx.get(url, purpose="robots.txt (browser identity)", use_cache=False, headers=BROWSER_HEADERS,
+                         identity="browser", allow_when_blocked=True, escalate=False)
+            if r2.error is None and r2.status < 400 and not r2.blocked:
+                r = r2
         out = {"url": url, "status": r.status, "found": False}
         if r.error:
             self.warn(f"Could not read robots.txt ({r.error}).")
@@ -60,8 +62,7 @@ class Robots(Check):
         else:
             ctx.facts["rules_forbid_start"] = True
             self.warn("robots.txt DISALLOWS the start page for bots. Scraping it goes against the "
-                      "site's stated rules - discuss with the client before taking the job. "
-                      "The scout did not request it.")
+                      "site's stated rules - discuss with the client before taking the job.")
 
         delay = 0
         for agent in (BOT_TOKEN, "*"):
