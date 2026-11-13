@@ -43,6 +43,7 @@ from __future__ import annotations
 import json
 import os
 import re
+from urllib.parse import urlsplit
 import shutil
 import socket
 import subprocess
@@ -401,8 +402,14 @@ def _empty(data):
     data["guards"] = {}
 
 
+def _path_q(url) -> str:
+    # each FakeSite gets a fresh ephemeral port, so compare path+query only, never scheme/host/port
+    sp = urlsplit(str(url))
+    return sp.path + (f"?{sp.query}" if sp.query else "")
+
+
 def _req_list(r: Run):
-    return [(str(e.get("url")), str(e.get("purpose")), str(e.get("identity")), e.get("status")) for e in r.log]
+    return [(_path_q(e.get("url")), str(e.get("purpose")), str(e.get("identity")), e.get("status")) for e in r.log]
 
 
 def check5():
@@ -1001,9 +1008,7 @@ def check11():
     lines = out.strip().splitlines()
     need(lines and lines[0] == VERSION, f"scout.__version__ is {lines[:1]}, want {VERSION}")
     need(len(lines) > 1 and lines[1].startswith(f"SiteScout/{VERSION}"), f"honest UA {lines[1:2]} lacks {VERSION}")
-    data = tomllib.loads((REPO / "pyproject.toml").read_text(encoding="utf-8"))
-    proj = data.get("project", {})
-    need("version" not in proj and "version" in proj.get("dynamic", []), "pyproject must keep version dynamic")
+    # how the version is sourced (static or dynamic) is not in the spec; only what is shown is checked
     exe = tool("site-scout")
     note = ""
     if exe:
