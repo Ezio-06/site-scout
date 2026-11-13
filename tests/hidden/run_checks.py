@@ -1,8 +1,34 @@
-r"""Hidden acceptance checks for spec phase2-quality (checks 1-11; 12 is manual) plus the
-phase-1 regression checks (p1, p3-p8; p2/p10 are folded into 11, p9 into 9).
+r"""Hidden acceptance checks.
 
-    python tests/hidden/run_checks.py            everything
-    python tests/hidden/run_checks.py 3 5 p4     only checks 3, 5 and phase-1 check 4
+  d1-d10  spec phase3-docs-release (checks 1-10; 11 is manual)
+  1-11    spec phase2-quality (12 is manual)
+  p1, p3-p8  phase-1 regression checks (p2/p10 folded into 11, p9 into 9)
+
+    python tests/hidden/run_checks.py            everything (d-checks first, d8 after p1, d10 last)
+    python tests/hidden/run_checks.py d1 d7      only phase-3 checks 1 and 7
+    python tests/hidden/run_checks.py 3 5 p4     only phase-2 checks 3, 5 and phase-1 check 4
+
+PHASE 3 (docs/release) - what the d-checks read; nothing touches the network
+  README sections : '## ' headings, matched in order: why / example|sample / quick start|install /
+                    usage / what it checks / tested / responsible / comparison|vs / architecture /
+                    limitation (+ a roadmap|planned heading before credits) / credit|licence.
+                    A section runs to the next matched one, so '## Adding a check' may follow
+                    Architecture. Headings inside code fences are ignored.
+  flags table     : a pipe table in Usage whose first header cell says Flag/Option; every flag in
+                    any of its cells counts. Exit-code table: first header cell says Code/Exit.
+  check table     : the 'What it checks' table column whose header says Check/Name.
+  example excerpt : fenced block, '>' quote or pipe-table lines inside the example section; each
+                    must be a line of examples/books.toscrape.com/scout_card.md ('...' allowed).
+  comparison      : a pipe table naming caniscrape, scraperecon, ScrapeProbe, wafw00f (as columns
+                    or rows). Cells starting yes/no/partial/unknown (or a description) are compared
+                    with a truth table built from research reports 01 and 06 (local, untracked).
+                    A row with no matching research fact must say no/not found for competitors.
+  holdout         : numbers are read at run time from holdout/runs/20261022-004000/score.md, and
+                    real (non-practice) site names from holdout/ - never written to tracked files.
+  example gaps    : requests.log.json has no timestamps, so the 2 s gap per request cannot be
+                    proven from committed files; d4 checks config min_delay >= 2 and that the
+                    run took at least (requests - 1) x min_delay.
+  CI on origin    : not checked here (the lead checks the CI run on origin/main).
 
 Run with the project venv's Python (checks call this same interpreter, and look for
 pytest / ruff next to it). Only local 127.0.0.1 fake sites are scouted. p1 and p8 need
@@ -43,7 +69,7 @@ from __future__ import annotations
 import json
 import os
 import re
-from urllib.parse import urlsplit
+from urllib.parse import unquote, urlsplit
 import shutil
 import socket
 import subprocess
@@ -64,7 +90,8 @@ from hidden_sites import FakeSite  # noqa: E402
 
 VERSION = "1.3.0"
 REPO_URL = "https://github.com/Ezio-06/site-scout"
-AUTHOR = "Ezio-06 <Ezio-06@users.noreply.github.com>"
+# ID-based noreply (project git rule; the plain noreply form does not link to the profile)
+AUTHOR = "Ezio-06 <74005455+Ezio-06@users.noreply.github.com>"
 # built from pieces so this file never spells the private words / paths itself
 # private terms live in an untracked local file (never committed); see check 7
 _PT = REPO / "private_terms.txt"
@@ -999,7 +1026,7 @@ def check10():
 
 
 def check11():
-    """Version 1.3.0 wherever it is shown; commits by Ezio-06 only, no Claude lines."""
+    """Version 1.3.0 wherever it is shown; commits by Ezio-06 only, no AI attribution lines."""
     want = f"site-scout {VERSION}"
     rc, out = run([sys.executable, REPO / "run_scout.py", "--version"], cwd=REPO, timeout=60)
     need(rc == 0 and out.strip() == want, f"run_scout.py --version: rc {rc}, {out.strip()!r}, want {want!r}")
@@ -1027,7 +1054,7 @@ def check11():
     commits = [c.strip() for c in out.split("@@END@@") if c.strip()]
     authors = {c.splitlines()[0].strip() for c in commits}
     need(authors == {AUTHOR}, f"unexpected authors: {sorted(authors - {AUTHOR})}")
-    badl = [ln.strip() for ln in out.splitlines() if re.search(r"co-authored-by|claude|generated with", ln, re.I)]
+    badl = [ln.strip() for ln in out.splitlines() if re.search(r"co-authored-by|generated with|" + "cla" + "ude", ln, re.I)]
     need(not badl, f"forbidden lines in commit messages: {badl[:5]}")
     return f"--version '{want}', __version__ and UA {VERSION}{note}; {len(commits)} commits by {AUTHOR} only"
 
@@ -1273,10 +1300,945 @@ def p_check8():
     return f"{wheels[0].name}: data files, MIT, extras browser/tls/dev, wafw00f credited{note}"
 
 
-CHECKS = {"1": check1, "2": check2, "3": check3, "4": check4, "5": check5, "6": check6, "7": check7,
+# ================================================================== phase 3: docs + release (d1-d10)
+SPEC_URL = "https://books.toscrape.com/catalogue/category/books_1/index.html"
+EXAMPLE = REPO / "examples" / "books.toscrape.com"
+README = REPO / "README.md"
+PRACTICE = ("toscrape", "scrapethissite", "webscraper", "httpbin")
+COMPETITORS = ("caniscrape", "scraperecon", "scrapeprobe", "wafw00f")
+RESEARCH = REPO / "research" / "site-scout-landscape"
+HOLDOUT_RUN = REPO / "holdout" / "runs" / "20261022-004000"
+# names of AI vendors/tools, built from pieces so this file never spells them
+AI_TOOL_RE = "|".join(["cla" + "ude", "anth" + "ropic", "chat" + "gpt", "open" + "ai", "co" + "pilot",
+                       "gem" + "ini"])
+EARLIER = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "p1", "p3", "p4", "p5", "p6", "p7", "p8"]
+RESULTS: dict = {}
+
+
+def _read(p: Path) -> str:
+    need(p.exists(), f"missing {p.relative_to(REPO).as_posix()}")
+    return p.read_text(encoding="utf-8", errors="replace")
+
+
+def _fence_mask(lines) -> list:
+    """True for lines inside (or opening/closing) a fenced code block."""
+    mask, fence = [], None
+    for ln in lines:
+        s = ln.strip()
+        m = re.match(r"^(`{3,}|~{3,})", s)
+        if m and fence is None:
+            fence = m.group(1)
+            mask.append(True)
+        elif m and s.startswith(fence) and not s.strip(fence[0]):
+            fence = None
+            mask.append(True)
+        else:
+            mask.append(fence is not None)
+    return mask
+
+
+def md_headings(text: str) -> list:
+    """[(line index, level, title)] outside fenced code blocks."""
+    lines = text.splitlines()
+    mask = _fence_mask(lines)
+    out = []
+    for i, ln in enumerate(lines):
+        h = None if mask[i] else re.match(r"^(#{1,6})\s+(.*?)\s*#*\s*$", ln)
+        if h:
+            out.append((i, len(h.group(1)), h.group(2).strip()))
+    return out
+
+
+def md_tables(lines, mask=None) -> list:
+    """[(first line index, header cells, [row cells])] for pipe tables outside code fences."""
+    mask = mask or [False] * len(lines)
+    tables, i = [], 0
+
+    def cells(ln):
+        s = ln.strip()
+        s = s[1:] if s.startswith("|") else s
+        s = s[:-1] if s.endswith("|") and not s.endswith("\\|") else s
+        return [c.strip() for c in re.split(r"(?<!\\)\|", s)]
+    while i < len(lines) - 1:
+        a, b = lines[i], lines[i + 1]
+        if (not mask[i] and "|" in a and re.match(r"^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)*\|?\s*$", b)):
+            head, rows, j = cells(a), [], i + 2
+            while j < len(lines) and "|" in lines[j] and lines[j].strip() and not mask[j]:
+                rows.append(cells(lines[j]))
+                j += 1
+            tables.append((i, head, rows))
+            i = j
+        else:
+            i += 1
+    return tables
+
+
+README_SECTIONS = [  # (number, label, heading regex) - section 1 is the title block
+    (2, "Why it exists", r"\bwhy\b"),
+    (3, "example card", r"example|sample"),
+    (4, "Quick start", r"quick\s*start|install|getting started|set ?up"),
+    (5, "Usage", r"^usage|^use\b|how to use|^using\b"),
+    (6, "What it checks", r"what it checks|^checks\b"),
+    (7, "How it's tested", r"tested|testing|accuracy"),
+    (8, "Responsible use", r"responsible|ethic|polite"),
+    (9, "Comparison", r"compar|alternative|\bvs\b|other tools"),
+    (10, "Architecture", r"architecture"),
+    (11, "Limitations", r"limitation"),
+    (12, "Credits and licence", r"credit|licen[cs]e"),
+]
+
+
+def readme_layout() -> dict:
+    """Finds the '## ' heading of each spec section, in order. A section runs to the start of the
+    next found section, so extra '## ' headings (e.g. 'Adding a check') belong to the one before."""
+    if "readme" in _CACHE:
+        return _CACHE["readme"]
+    text = _read(README)
+    lines = text.splitlines()
+    mask = _fence_mask(lines)
+    hs = md_headings(text)
+    h2 = [(i, t) for i, lvl, t in hs if lvl == 2]
+    found, probs, prev = {}, [], -1
+    for num, label, rx in README_SECTIONS:
+        cands = [k for k, (_, t) in enumerate(h2) if re.search(rx, t, re.I)]
+        after = [k for k in cands if k > prev]
+        if after:
+            prev = after[0]
+            found[num] = h2[prev][0]
+        elif cands:
+            probs.append(f"section {num} ({label}) out of order: '## {h2[cands[0]][1]}' comes too early")
+        else:
+            probs.append(f"section {num} ({label}) missing: no '## ' heading matches /{rx}/")
+    starts = sorted(found.values())
+    spans = {}
+    for num, st in found.items():
+        nxt = [s for s in starts if s > st]
+        spans[num] = (st, nxt[0] if nxt else len(lines))
+    lay = dict(text=text, lines=lines, mask=mask, hs=hs, h2=h2, spans=spans, probs=probs)
+    _CACHE["readme"] = lay
+    return lay
+
+
+def section(num: int) -> str:
+    lay = readme_layout()
+    if num not in lay["spans"]:
+        raise Fail(f"README section {num} not found ({'; '.join(lay['probs'][:3])})")
+    a, b = lay["spans"][num]
+    return "\n".join(lay["lines"][a:b])
+
+
+def section_lines(num: int) -> tuple:
+    lay = readme_layout()
+    if num not in lay["spans"]:
+        raise Fail(f"README section {num} not found ({'; '.join(lay['probs'][:3])})")
+    a, b = lay["spans"][num]
+    return lay["lines"][a:b], lay["mask"][a:b]
+
+
+def gh_slug(title: str) -> str:
+    t = re.sub(r"\[([^\]]*)\]\([^)]*\)", r"\1", title)
+    t = re.sub(r"[`*_~]", "", t).strip().lower()
+    t = re.sub(r"[^\w\- ]", "", t)
+    return t.replace(" ", "-")
+
+
+def md_links(lines, mask) -> list:
+    """Link/image targets outside code fences (inline, reference-style, <img src>, <a href>)."""
+    out = []
+    for ln, inside in zip(lines, mask):
+        if inside:
+            continue
+        ln = re.sub(r"`[^`]*`", "", ln)
+        out += re.findall(r"\]\(\s*<?([^)\s>]+)>?(?:\s+\"[^\"]*\")?\s*\)", ln)
+        out += re.findall(r"^\s*\[[^\]]+\]:\s*<?(\S+?)>?(?:\s|$)", ln)
+        out += re.findall(r"<(?:img|a)\b[^>]*?\b(?:src|href)\s*=\s*[\"']([^\"']+)", ln, re.I)
+    return out
+
+
+def _ignored(rel: str) -> bool:
+    if not has_git():
+        return False
+    rc, _ = run(["git", "check-ignore", "-q", rel], cwd=REPO, timeout=30)
+    return rc == 0
+
+
+def d_check1():
+    """README: sections 1-12 in order, <= 260 lines, required content in each, relative links resolve."""
+    lay = readme_layout()
+    lines, probs = lay["lines"], list(lay["probs"])
+    if len(lines) > 260:
+        probs.append(f"README has {len(lines)} lines, max 260")
+    # 1. name, CI badge, licence badge, one-line pitch
+    first = next((ln for ln in lines if ln.strip()), "")
+    if not re.match(r"^#\s+Site Scout\b", first):
+        probs.append(f"first line is {first[:60]!r}, want '# Site Scout'")
+    top_end = lay["h2"][0][0] if lay["h2"] else len(lines)
+    top = "\n".join(lines[:top_end])
+    imgs = re.findall(r"!\[([^\]]*)\]\(\s*([^)\s]+)", top) + \
+        [("", u) for u in re.findall(r"<img\b[^>]*?src\s*=\s*[\"']([^\"']+)", top, re.I)]
+    if not any("Ezio-06/site-scout/actions/workflows/ci.yml" in u for _, u in imgs):
+        probs.append("no CI badge for Ezio-06/site-scout/actions/workflows/ci.yml above the first '## '")
+    if not any(re.search(r"licen[cs]e", a + " " + u, re.I) for a, u in imgs):
+        probs.append("no licence badge above the first '## '")
+    pitch = [ln for ln in lines[1:top_end] if ln.strip() and not ln.lstrip().startswith(("#", "[!", "!", "<", "---"))
+             and len(ln.split()) >= 5]
+    if not pitch:
+        probs.append("no one-line pitch (a sentence of 5+ words) between the title and the first '## '")
+    # per-section content (only for sections that were found)
+    want = {
+        2: [(r"protect", "'protected' (what other tools answer)"), (r"\ball\b", "'ALL the data'"),
+            (r"pag|reach", "paging reach"), (r"feed", "hidden feeds"), (r"evidence", "evidence level")],
+        3: [(r"\]\(\s*\.?/?examples/books\.toscrape\.com/scout_card\.md\s*\)", "link to the full example card")],
+        4: [(r"pipx install git\+https://github\.com/Ezio-06/site-scout", "pipx install git+https://github.com/Ezio-06/site-scout"),
+            (r"\bpip install\b", "pip install"), (r"\[browser", "[browser] extra"), (r"\[tls|,\s*tls\]", "[tls] extra"),
+            (r"playwright install chromium", "playwright install chromium"), (r"setup\.bat", "setup.bat"),
+            (r"scout\.bat", "scout.bat")],
+        5: [(r"--output -", "--output -"), (r"\]\(\s*\.?/?docs/report\.schema\.json\s*\)", "link to docs/report.schema.json")],
+        7: [(r"\]\(\s*\.?/?docs/holdout\.md\s*\)", "link to docs/holdout.md"), (r"95\s?%", "headline 95%"),
+            (r"landmine", "landmine fake sites"), (r"hidden", "hidden acceptance checks"),
+            (r"before", "checks written BEFORE the code"),
+            (r"1\.1\b|(earlier|older|previous) version", "that the holdout ran on an earlier version (v1.1)")],
+        8: [(r"SiteScout/", "honest SiteScout/<ver> identity"), (r"robots\.txt", "robots.txt"),
+            (r"captcha", "no CAPTCHA solving"), (r"payload|attack", "no attack payloads"), (r"passive", "passive guard matching"),
+            (r"label", "one labelled browser-identity comparison"), (r"\b60\b", "request cap (60)"),
+            (r"\b2(\.0)?\s?(s\b|sec|seconds)", "request gap (2 s)")],
+        10: [(r"```mermaid", "a mermaid diagram"), (r"fetcher\.py", "the layout list"),
+             (r"^#{2,4}\s+Adding a check", "'Adding a check'")],
+        11: [(r"quota", "quotas limitation"), (r"network", "results hold for the network it ran from"),
+             (r"feed", "feed-paging reach (roadmap)"), (r"batch", "batch mode (roadmap)"),
+             (r"starter", "starter-scraper output (roadmap)"), (r"fresh[^\n]{0,60}holdout|holdout[^\n]{0,60}fresh",
+                                                                "fresh holdout (roadmap)")],
+        12: [(r"wafw00f", "wafw00f credit"), (r"BSD", "BSD-3"), (r"\bMIT\b", "MIT licence"),
+             (r"^Built with help from AI coding tools\.\s*$", "the exact line 'Built with help from AI coding tools.'")],
+    }
+    for num, items in want.items():
+        if num not in lay["spans"]:
+            continue
+        body = section(num)
+        for rx, what in items:
+            if not re.search(rx, body, re.I | re.M):
+                probs.append(f"section {num} lacks {what}")
+    if 2 in lay["spans"]:
+        words = len(" ".join(section(2).splitlines()[1:]).split())
+        if not 15 <= words <= 130:
+            probs.append(f"'Why it exists' is {words} words; spec says 3-5 lines (15-130 words accepted)")
+    if 10 in lay["spans"]:
+        mm = re.search(r"```mermaid\s*\n(.*?)```", section(10), re.S | re.I)
+        if mm:
+            body = mm.group(1).lower()
+            miss = [w for w in ("cli", "runner", "check", "fetcher", "report") if w not in body]
+            if miss or body.count("-->") + body.count("---") + body.count("==>") < 4:
+                probs.append(f"mermaid diagram lacks {miss or 'enough arrows'} (CLI -> runner -> checks -> fetcher -> report)")
+    if 11 in lay["spans"]:
+        a = lay["spans"][11][0]
+        b = lay["spans"].get(12, (len(lines),))[0]
+        if not any(a <= i < b and re.search(r"roadmap|planned", t, re.I) for i, _, t in lay["hs"]):
+            probs.append("no roadmap heading in or after 'Limitations' (before credits)")
+    bad_ai = re.findall(AI_TOOL_RE, lay["text"], re.I)
+    if bad_ai:
+        probs.append(f"README names an AI tool/vendor ({len(bad_ai)}x); use only 'Built with help from AI coding tools.'")
+    # links
+    slugs = Counter()
+    anchors = set()
+    for _, _, t in lay["hs"]:
+        s = gh_slug(t)
+        anchors.add(s if not slugs[s] else f"{s}-{slugs[s]}")
+        slugs[s] += 1
+    bad_links, n_rel = [], 0
+    for tgt in md_links(lines, lay["mask"]):
+        if re.match(r"^[a-z][a-z0-9+.-]*:", tgt, re.I):
+            continue
+        if tgt.startswith("#"):
+            if tgt[1:].lower() not in anchors:
+                bad_links.append(f"{tgt} (no such heading)")
+            continue
+        n_rel += 1
+        path = tgt.split("#")[0].split("?")[0]
+        rel = unquote(path)
+        rel = rel[2:] if rel.startswith("./") else rel
+        p = (REPO / rel).resolve()
+        if REPO.resolve() not in p.parents and p != REPO.resolve():
+            bad_links.append(f"{tgt} (outside the repo)")
+        elif not p.exists():
+            bad_links.append(f"{tgt} (missing)")
+        elif _ignored(rel.rstrip("/")):
+            bad_links.append(f"{tgt} (git-ignored: broken in a public clone)")
+    if bad_links:
+        probs.append(f"broken relative links: {bad_links[:6]}")
+    need(not probs, f"{len(probs)} problem(s): " + " | ".join(probs[:12]))
+    return f"{len(lines)} lines, 12 sections in order, content present, {n_rel} relative links ok"
+
+
+def help_text() -> str:
+    if "help" not in _CACHE:
+        rc, out = run([sys.executable, REPO / "run_scout.py", "--help"], cwd=REPO, timeout=60)
+        need(rc == 0, f"run_scout.py --help exited {rc}:{tail(out)}")
+        _CACHE["help"] = out
+    return _CACHE["help"]
+
+
+def help_flags() -> tuple:
+    """-> ([set of option strings per flag], {flag: choices}, set of exit codes) from --help."""
+    groups, choices, codes, state = [], {}, set(), None
+    for ln in help_text().splitlines():
+        low = ln.strip().lower()
+        if re.match(r"^(options|optional arguments):", low):
+            state = "opt"
+            continue
+        if re.match(r"^exit codes?:", low):
+            state = "exit"
+            continue
+        if ln and not ln[0].isspace():
+            state = None
+            continue
+        if state == "opt":
+            m = re.match(r"^  (-\S.*?)(?:\s{2,}|$)", ln)
+            if m:
+                head = m.group(1)
+                opts = re.findall(r"(?:^|,\s*)(--?[A-Za-z][\w-]*)", head)
+                if opts:
+                    groups.append(set(opts))
+                    ch = re.search(r"\{([^}]+)\}", head)
+                    if ch:
+                        for o in opts:
+                            choices[o] = set(ch.group(1).split(","))
+        elif state == "exit":
+            m = re.match(r"^\s+(\d+)\s", ln)
+            if m:
+                codes.add(int(m.group(1)))
+    return groups, choices, codes
+
+
+FLAG_RE = re.compile(r"(?<![\w-])(--?[A-Za-z][\w-]*)")
+
+
+def d_check2():
+    """README flags table = flags in --help (both ways); exit-code table = codes in --help."""
+    groups, choices, codes = help_flags()
+    need(groups and len(groups) >= 10, f"could not read flags from --help (got {groups})")
+    need(codes, "could not read exit codes from --help")
+    lines, mask = section_lines(5)
+    tables = md_tables(lines, mask)
+    flag_tabs = [t for t in tables if t[1] and re.search(r"flag|option", t[1][0], re.I)]
+    need(flag_tabs, "Usage section has no flags table (first header cell 'Flag' or 'Option')")
+    rows = [r for t in flag_tabs for r in t[2]]
+    in_table = set()
+    for r in rows:
+        in_table |= set(FLAG_RE.findall(" ".join(r)))
+    all_help = set().union(*groups)
+    missing = [sorted(g, key=len)[-1] for g in groups if not g & in_table]
+    extra = sorted(in_table - all_help)
+    probs = []
+    if missing:
+        probs.append(f"flags in --help but not in the README table: {missing}")
+    if extra:
+        probs.append(f"flags in the README table that --help lacks: {extra}")
+    for flag, ch in choices.items():
+        for r in rows:
+            txt = " ".join(r)
+            for val in re.findall(rf"{re.escape(flag)}[ =]([\w-]+)", txt):
+                if val not in ch:
+                    probs.append(f"table shows {flag} {val}, --help allows {sorted(ch)}")
+    # defaults stated in the table must be the real defaults (from the committed default run's config)
+    try:
+        cfg = json.loads(_read(EXAMPLE / "report.json")).get("config") or {}
+    except (json.JSONDecodeError, Fail):
+        cfg = {}
+    for flag, key in (("--min-delay", "min_delay"), ("--max-requests", "max_requests"),
+                      ("--pace-interval", "pace_interval"), ("--pace-requests", "pace_requests")):
+        if key not in cfg:
+            continue
+        for r in rows:
+            txt = " ".join(r)
+            if flag in txt:
+                for v in re.findall(r"default[:\s]+`?(\d+(?:\.\d+)?)", txt, re.I):
+                    if float(v) != float(cfg[key]):
+                        probs.append(f"table says {flag} default {v}, real default {cfg[key]}")
+    code_tabs = [t for t in md_tables(*readme_layout_lines()) if t[1] and re.search(r"code|exit", t[1][0], re.I)]
+    need(code_tabs, "README has no exit-code table (first header cell 'Code' or 'Exit code')")
+    readme_codes = set()
+    for t in code_tabs:
+        for r in t[2]:
+            m = re.match(r"^\**`?(\d+)`?\**$", r[0].strip())
+            if m:
+                readme_codes.add(int(m.group(1)))
+    if readme_codes != codes:
+        probs.append(f"README exit codes {sorted(readme_codes)} != --help {sorted(codes)}")
+    need(not probs, " | ".join(probs[:8]))
+    return f"{len(groups)} flags match both ways; exit codes {sorted(codes)} match"
+
+
+def readme_layout_lines():
+    lay = readme_layout()
+    return lay["lines"], lay["mask"]
+
+
+def list_checks() -> list:
+    if "checks" not in _CACHE:
+        rc, out = run([sys.executable, REPO / "run_scout.py", "--list-checks"], cwd=REPO, timeout=60)
+        need(rc == 0, f"--list-checks exited {rc}:{tail(out)}")
+        _CACHE["checks"] = [ln.split()[0] for ln in out.splitlines() if ln.strip()]
+    return _CACHE["checks"]
+
+
+def landmine_count() -> int:
+    if "landmines" not in _CACHE:
+        pt = tool("pytest")
+        cmd = [pt] if pt else [sys.executable, "-m", "pytest"]
+        rc, out = run([*cmd, "-p", "no:cacheprovider", "--collect-only", "-q"], cwd=REPO, timeout=300)
+        need(rc == 0, f"pytest --collect-only failed (rc {rc}):{tail(out)}")
+        ids = [ln.strip() for ln in out.splitlines() if "::" in ln]
+        _CACHE["landmines"] = sum(1 for i in ids if re.search(r"::test_landmines?\[", i))
+    return _CACHE["landmines"]
+
+
+def _doc_texts(names=("README.md", "docs/design.md", "docs/holdout.md")) -> dict:
+    return {n: (REPO / n).read_text(encoding="utf-8", errors="replace") for n in names if (REPO / n).exists()}
+
+
+def _num_mentions(text: str, rxs) -> list:
+    out = []
+    for rx in rxs:
+        for m in re.finditer(rx, text, re.I):
+            out.append((m.group(1).replace(",", ""), text[max(0, m.start() - 30):m.end() + 10].replace("\n", " ")))
+    return out
+
+
+def d_check3():
+    """Numbers in README/docs match the code: checks, landmines, signatures (171), CI matrix; design.md exists."""
+    probs = []
+    docs = _doc_texts()
+    need("README.md" in docs, "no README.md")
+    for n in ("docs/design.md", "docs/holdout.md"):
+        if n not in docs:
+            probs.append(f"{n} missing")
+    names = list_checks()
+    lm = landmine_count()
+    need(lm > 0, "pytest collects no landmine cases")
+    nsig = len(shipped_signatures().get("guards") or {})
+    # what-it-checks table (its 'Check' column) = --list-checks
+    lines, mask = section_lines(6)
+    tab_names = set()
+    for _, head, rows in md_tables(lines, mask):
+        col = next((i for i, h in enumerate(head) if re.search(r"check|name", h, re.I)), None)
+        if col is None:
+            continue
+        tab_names |= {re.sub(r"[`*\s]", "", r[col]) for r in rows if col < len(r) and r[col].strip()}
+    if set(names) - tab_names:
+        probs.append(f"'What it checks' table lacks {sorted(set(names) - tab_names)} (--list-checks has {len(names)})")
+    if tab_names - set(names):
+        probs.append(f"'What it checks' table names checks --list-checks lacks: {sorted(tab_names - set(names))}")
+    seen = {"landmine": [], "signature": [], "check": []}
+    for name, txt in docs.items():
+        for v, ctx in _num_mentions(txt, [r"\b(\d+)\s+(?:[\w-]+\s+){0,2}landmines?\b", r"\b(\d+)-(?:site|case)\s+landmine",
+                                          r"landmines?[\w\s-]{0,25}?\(\s*(\d+)\s*\)"]):
+            seen["landmine"].append((name, v, ctx))
+            if int(v) != lm:
+                probs.append(f"{name}: landmine count {v} != {lm} pytest landmine cases ({ctx!r})")
+        for v, ctx in _num_mentions(txt, [r"\b(\d[\d,]*)\s+(?:[\w-]+\s+){0,2}signatures?\b"]):
+            seen["signature"].append((name, v, ctx))
+            if int(v) != nsig:
+                probs.append(f"{name}: signature count {v} != {nsig} guards in guard_signatures.json ({ctx!r})")
+        if name == "docs/holdout.md":
+            continue
+        for m in re.finditer(r"\b(\d+)\s+(?:built-in\s+|independent\s+|separate\s+)?checks\b", txt, re.I):
+            before = txt[max(0, m.start() - 40):m.start()].lower()
+            if re.search(r"hidden|acceptance|landmine|unit|pytest|holdout|scored|per-check|ci\b", before):
+                continue
+            seen["check"].append((name, m.group(1)))
+            if int(m.group(1)) != len(names):
+                probs.append(f"{name}: '{m.group(0)}' but --list-checks has {len(names)}")
+    if not any(n == "README.md" for n, *_ in seen["landmine"]):
+        probs.append(f"README never states the landmine count ({lm})")
+    if not any(n == "README.md" for n, *_ in seen["signature"]):
+        probs.append(f"README never states the signature count ({nsig})")
+    # CI matrix in 'How it's tested'
+    ci = REPO / ".github" / "workflows" / "ci.yml"
+    doc, _how = load_yaml(_read(ci))
+    combos = []
+    for job in (doc.get("jobs") or {}).values():
+        if isinstance(job, dict):
+            combos += _combos((job.get("strategy") or {}).get("matrix"))
+    pys = {str(c.get("python") or c.get("python-version") or "") for c in combos} - {""}
+    oss = {str(c.get("os") or "").lower() for c in combos}
+    sec7 = section(7)
+    stated = set(re.findall(r"(?<![\d.])(3\.\d{1,2})(?!\d|\.\d)", sec7))
+    if sec7 and stated != pys:
+        probs.append(f"'How it's tested' names Python {sorted(stated)}, ci.yml matrix runs {sorted(pys)}")
+    for fam, words in (("ubuntu", r"linux|ubuntu"), ("windows", r"windows"), ("macos", r"mac\s?os|macos|\bmac\b")):
+        in_ci = any(fam in o for o in oss)
+        in_doc = bool(re.search(words, sec7, re.I))
+        if in_ci != in_doc:
+            probs.append(f"'How it's tested' {'omits' if in_ci else 'claims'} {fam} (ci.yml: {sorted(oss)})")
+    # design.md: topics from the spec, ~1.5 pages
+    if "docs/design.md" in docs:
+        d = docs["docs/design.md"]
+        words = len(d.split())
+        if words > 900:
+            probs.append(f"docs/design.md is {words} words (spec: max ~1.5 pages, 900 words accepted)")
+        for rx, what in ((r"verified", "evidence levels"), (r"broken", "evidence levels"), (r"fetcher", "one-door fetcher"),
+                         (r"landmine", "landmine method"), (r"honest", "honest-identity decision"),
+                         (r"passive", "passive guard matching"), (r"thin", "thin-page rule")):
+            if not re.search(rx, d, re.I):
+                probs.append(f"docs/design.md lacks {what} ({rx})")
+    need(not probs, " | ".join(probs[:10]))
+    return (f"checks {len(names)}, landmines {lm}, signatures {nsig}, CI {sorted(pys)} on {sorted(oss)} - "
+            f"all stated numbers match")
+
+
+def d_check4():
+    """Committed example: schema-valid, version 1.3.0, honest identity, <= 60 requests, polite config."""
+    val = _validator()
+    rep = json.loads(_read(EXAMPLE / "report.json"))
+    log = json.loads(_read(EXAMPLE / "requests.log.json"))
+    card = _read(EXAMPLE / "scout_card.md")
+    probs = []
+    errs = _errors(val, rep)
+    if errs:
+        probs.append(f"report.json fails docs/report.schema.json ({len(errs)}): {errs[:3]}")
+    blob = json.dumps(rep, ensure_ascii=False)
+    vers = set(re.findall(r"SiteScout/(\d+\.\d+\.\d+)", blob + card))
+    if vers != {VERSION}:
+        probs.append(f"versions in report/card: {sorted(vers) or 'none'}, want only {VERSION}")
+    if str(rep.get("url", "")).rstrip("/") != SPEC_URL.rstrip("/"):
+        probs.append(f"report url {rep.get('url')!r}, spec wants {SPEC_URL}")
+    cfg = rep.get("config") or {}
+    for key, ok, what in (("min_delay", lambda v: isinstance(v, (int, float)) and v >= 2, ">= 2"),
+                          ("max_requests", lambda v: isinstance(v, int) and v <= 60, "<= 60"),
+                          ("identity", lambda v: v == "honest", "'honest'"),
+                          ("pace_fast", lambda v: v is False, "false (default)"),
+                          ("proxy", lambda v: v is None, "null (default)"),
+                          ("browser", lambda v: v == "auto", "'auto' (default)")):
+        if not ok(cfg.get(key)):
+            probs.append(f"config {key} = {cfg.get(key)!r}, want {what}")
+    need(isinstance(log, list) and log, "requests.log.json is empty or not a list")
+    if len(log) > 60:
+        probs.append(f"{len(log)} requests logged, max 60")
+    if rep.get("requests") != len(log):
+        probs.append(f"report says {rep.get('requests')} requests, log has {len(log)}")
+    ns = [e.get("n") for e in log]
+    if ns != list(range(1, len(log) + 1)):
+        probs.append(f"log numbering is not 1..{len(log)} (trimmed or edited?): {ns[:12]}")
+    comps = [e for e in log if ident_kind(e) == "browser"]
+    unl = [e.get("n") for e in comps if "comparison" not in str(e.get("purpose", "")).lower()]
+    if unl or len(comps) > 1:
+        probs.append(f"browser-identity requests not labelled as the one comparison: n={unl or [e.get('n') for e in comps]}")
+    other = [(e.get("n"), e.get("identity")) for e in log if ident_kind(e) not in ("honest", "browser")]
+    if other:
+        probs.append(f"requests without the SiteScout identity: {other[:5]}")
+    hosts = {urlsplit(str(e.get("url", ""))).hostname for e in log}
+    if hosts != {"books.toscrape.com"}:
+        probs.append(f"log touches hosts {sorted(map(str, hosts))}, want only books.toscrape.com")
+    md = cfg.get("min_delay") or 0
+    el = rep.get("elapsed_s")
+    if isinstance(el, (int, float)) and isinstance(md, (int, float)) and el < (len(log) - 1) * md:
+        probs.append(f"run took {el} s for {len(log)} requests: less than {len(log) - 1} gaps x {md} s")
+    if has_git():
+        rc, out = run(["git", "ls-files", "examples/"], cwd=REPO, timeout=30)
+        tracked = [f for f in out.splitlines() if f.strip()]
+        snaps = [f for f in tracked if "/snapshots/" in f]
+        if snaps:
+            probs.append(f"snapshots are committed: {snaps[:3]}")
+        for f in ("scout_card.md", "report.json", "requests.log.json"):
+            if f"examples/books.toscrape.com/{f}" not in tracked:
+                probs.append(f"examples/books.toscrape.com/{f} is not committed")
+    need(not probs, " | ".join(probs[:10]))
+    return (f"schema-valid, SiteScout/{VERSION}, {len(log)} requests all honest, min_delay {md}, "
+            f"elapsed {el} s >= {len(log) - 1} x {md} s. NOT verifiable from committed files: per-request "
+            f"timestamps (the log has none), so each individual gap >= 2 s rests on the fetcher's min_delay")
+
+
+def _norm(s: str) -> str:
+    return re.sub(r"\s+", " ", s.replace(" ", " ")).strip()
+
+
+def d_check5():
+    """README example excerpt: every excerpt line is a line of the committed scout_card.md."""
+    card = {_norm(ln) for ln in _read(EXAMPLE / "scout_card.md").splitlines() if ln.strip()}
+    lines, mask = section_lines(3)
+    ex = []
+    for ln, inside in zip(lines[1:], mask[1:]):
+        s = ln.strip()
+        if inside:
+            if not re.match(r"^(`{3,}|~{3,})", s):
+                ex.append(ln)
+        elif s.startswith(">"):
+            ex.append(re.sub(r"^>\s?", "", s))
+        elif s.startswith("|"):
+            ex.append(s)
+    ex = [_norm(x) for x in ex if x.strip() and not re.fullmatch(r"(\.\.\.|…|\[\.\.\.\]|<!--.*-->)", x.strip())]
+    need(len(ex) >= 5, f"example excerpt has {len(ex)} line(s) (fenced block, quote or table in section 3); want >= 5")
+    bad = [x for x in ex if x not in card]
+    need(not bad, f"{len(bad)}/{len(ex)} excerpt lines are not in scout_card.md: {bad[:4]}")
+    need(any("**verified**" in x for x in ex), "excerpt shows no verified claim row")
+    return f"{len(ex)} excerpt lines, all found in examples/books.toscrape.com/scout_card.md"
+
+
+def holdout_rows() -> dict:
+    """{row name: (pct, fraction)} of the out-of-sample column in the scored run (read-only)."""
+    txt = _read(HOLDOUT_RUN / "score.md")
+    rows = {}
+    for ln in txt.splitlines():
+        m = re.match(r"^\|\s*\*\*(\w+)\*\*\s*\|\s*(\d+%)\s*\(([\d.]+/[\d.]+)\)", ln)
+        if m:
+            rows[m.group(1).lower()] = (m.group(2), m.group(3))
+    need("overall" in rows, "could not read the out-of-sample column from holdout score.md")
+    return rows
+
+
+def holdout_names() -> list:
+    """Site labels from the holdout files that are NOT practice/test sites (never written anywhere)."""
+    txt = ""
+    for p in (REPO / "holdout" / "sites.json", HOLDOUT_RUN / "score.md"):
+        if p.exists():
+            txt += p.read_text(encoding="utf-8", errors="replace")
+    labels = set()
+    for host in re.findall(r"https?://([A-Za-z0-9.-]+)", txt):
+        parts = host.lower().split(".")
+        if len(parts) < 2:
+            continue
+        lab = parts[-3] if len(parts) >= 3 and parts[-2] in ("co", "com", "org", "net", "gov", "ac") and len(parts[-1]) == 2 \
+            else parts[-2]
+        if not any(p in host.lower() for p in PRACTICE) and lab not in ("github", "example"):
+            labels.add(lab)
+    return sorted(labels)
+
+
+def d_check6():
+    """docs/holdout.md: method, out-of-sample table (95%, 109.5/115), date, version, 3 caveats; no real site names."""
+    txt = _read(REPO / "docs" / "holdout.md")
+    probs = []
+    rows = holdout_rows()
+    lines = txt.splitlines()
+    for name, (pct, frac) in rows.items():
+        hit = [ln for ln in lines if "|" in ln and re.search(rf"\b{name}\b", ln, re.I) and frac in ln]
+        if not hit:
+            probs.append(f"no table row for '{name}' with the out-of-sample {pct} ({frac})")
+    for rx, what in ((r"95\s?%", "95%"), (r"109\.5\s*/\s*115", "109.5/115"),
+                     (r"22 Oct(ober)? 2026|2026-10-22|Oct(ober)? 22,? 2026", "the date (22 Oct 2026)"),
+                     (r"v?1\.1\b", "the version (v1.1)"), (r"out[- ]of[- ]sample", "'out-of-sample'"),
+                     (r"blind", "scored blind"), (r"retire", "lockbox rule: fixed-against sites retired"),
+                     (r"in[- ]sample", "retired sites counted as in-sample"), (r"label", "labelled sites"),
+                     (r"(earlier|older|previous) version", "caveat 1: run on an earlier version"),
+                     (r"seen[^.\n]{0,30}twice|twice[^.\n]{0,30}seen|no longer[^.\n]{0,20}(true|clean|real)?\s*holdout",
+                      "caveat 2: sites seen twice / no longer a true holdout"),
+                     (r"fresh[^.\n]{0,80}(batch|holdout|sites)", "caveat 3: a fresh labelled batch"),
+                     (r"roadmap|planned", "caveat 3: ...on the roadmap")):
+        if not re.search(rx, txt, re.I):
+            probs.append(f"lacks {what}")
+    for v, ctx in _num_mentions(txt, [r"\b(\d+)\s+out[- ]of[- ]sample sites"]):
+        if v != "35":
+            probs.append(f"says {v} out-of-sample sites, score.md says 35 ({ctx!r})")
+    names = holdout_names()
+    scan = {"docs/holdout.md": txt}
+    try:
+        scan["README 'How it's tested'"] = section(7)
+    except Fail:
+        pass
+    for where, t in scan.items():
+        leaked = [n for n in names if re.search(rf"\b{re.escape(n)}\b", t, re.I)]
+        if leaked:
+            probs.append(f"{where} names non-practice holdout site(s): {leaked}")
+    need(not probs, " | ".join(probs[:10]))
+    return f"{len(rows)} per-check rows match score.md, date/version/caveats present, 0 of {len(names)} real site names"
+
+
+# competitor truth table from research/site-scout-landscape 01 + 06.
+# columns: caniscrape, scraperecon, scrapeprobe, wafw00f
+#   Y = research says it has it, P = partial / judgment call (any cell ok), N = research says it lacks it,
+#   U = research does not say (cell must read no / not found / unknown)
+# The feature is read "has X"; a row worded "No X" / "Never X" / "Without X" flips yes/no.
+COMP_RULES = [
+    ("passive matching", r"passive|no attack|without attack|non-?intrusive", "UUUN", False),
+    ("attack payloads", r"payload|attack|malicious|aggressive|intrusive", "UUUY", True),
+    ("captcha", r"captcha", "YNNU", True),
+    ("conditional GET", r"304|conditional|change marker|etag|not.changed", "NNNN", True),
+    ("paging reach", r"paging|pagination|page 2|last page|\breach", "NNPN", True),
+    ("feed replay", r"feed|xhr|hidden api|\bapi\b|replay|endpoint", "NNNN", True),
+    ("evidence levels", r"evidence|confidence|verified", "NPPU", True),
+    ("landmine/holdout", r"landmine|fake (adversarial )?sites?|test suite|holdout|accuracy", "UUUU", True),
+    ("identity comparison", r"comparison|labell?ed", "UUUU", True),
+    ("crawl-delay", r"crawl.?delay", "YUYU", True),
+    ("robots", r"robots", "YYYU", True),
+    ("sitemap", r"sitemap", "UYYU", True),
+    ("honest UA", r"honest|identif|user.?agent|\bua\b", "NUYU", True),
+    ("concurrent bursts", r"concurren|simultaneous|parallel|burst|at once|workers", "YYYU", True),
+    ("polite gaps", r"polite|gentle|\bgaps?\b|delay between|spaced", "PNPN", True),
+    ("rate/pace test", r"pace|pacing|rate|throttl|requests per|speed", "YPUN", True),
+    ("licence", r"licen[cs]e", "L", True),
+    ("guard detection", r"guard|\bwafs?\b|anti-?bot|bot.?(protection|management|detection)|vendor|protection|firewall",
+     "YYYY", True),
+    ("TLS impersonation", r"\btls\b|curl.?cffi|impersonat|ja3", "YYNU", True),
+    ("tech stack", r"\btech|framework|\bcms\b|wappalyzer", "UUYU", True),
+    ("JS/raw location", r"javascript|\bjs\b|render|browser|playwright|raw page|raw html|where the data", "YNUN", True),
+    ("embedded JSON", r"embedded|__next_data__|json-ld|app.?state|packed", "UYUU", True),
+    ("difficulty score", r"score|0.?10|difficulty|rating", "YUUU", True),
+    ("ToS/legal", r"\btos\b|terms|gdpr|legal|jurisdiction", "UUYU", True),
+    ("effort/time", r"effort|projection|estimate|how long", "YUYU", True),
+    ("honeypot", r"honeypot", "YUUU", True),
+    ("proxy", r"prox(y|ies)", "YNNU", True),
+    ("bulk data", r"bulk|open.?data|registry", "UUYU", True),
+    ("sample scrape", r"sample", "UUYU", True),
+    ("markdown report", r"markdown|\.md\b|\bcard\b", "UUYU", True),
+    ("JSON output", r"json|machine.?readable", "UYYP", True),
+    ("exit codes", r"exit.?codes?", "UUUU", True),
+    ("batch mode", r"batch|many urls|list of urls", "UUUP", True),
+    ("item structure", r"selector|fragil|load.?more|item list|structure", "NNNN", True),
+    ("recommendation", r"recommend|advice|\bmethod\b", "YYPU", True),
+    ("change detection", r"change detection|scan.to.scan|\bdiff\b|cloud|sync|telemetry", "YUUU", True),
+    ("repo metadata", r"stars|created|last (push|commit|update)|maintained|\bage\b|commits|version|pypi", "PPPP", True),
+    ("install/CLI", r"install|\bpip\b|\bcli\b|command.?line|open.?source", "PYPP", True),
+]
+LICENCES = {"caniscrape": "MIT", "scraperecon": "MIT", "scrapeprobe": "MIT", "wafw00f": "BSD"}
+
+
+def cell_kind(c: str) -> str:
+    s = re.sub(r"[*_`]", "", c).strip().lower()
+    if not s or re.match(r"^(\?|unknown|not stated|not documented|not checked|n/?a\b|unclear|not verified)", s):
+        return "UNKNOWN"
+    if re.match(r"^(no\b|none\b|not found|not seen|never\b|✗|✘|❌|—|–|-$)", s):
+        return "NO"
+    if re.match(r"^(partial|partly|some\b|limited|~|◐|basic|only\b|opt-in)", s):
+        return "PARTIAL"
+    if re.match(r"^(yes\b|y$|✓|✔|✅|☑)", s):
+        return "YES"
+    return "DESC"
+
+
+def comparison_table() -> list:
+    """[(feature text, {competitor: cell})] from the README comparison table (either orientation)."""
+    try:
+        lines, mask = section_lines(9)
+    except Fail:
+        lines, mask = readme_layout_lines()
+    for _, head, rows in md_tables(lines, mask):
+        hl = [h.lower() for h in head]
+        cols = {c: i for c in COMPETITORS for i, h in enumerate(hl) if c in re.sub(r"[`*\[\]]", "", h)}
+        if len(cols) >= 3:
+            return [(r[0], {c: (r[i] if i < len(r) else "") for c, i in cols.items()}) for r in rows], cols
+        firsts = [re.sub(r"[`*\[\]]", "", r[0]).lower() for r in rows]
+        rmap = {c: k for c in COMPETITORS for k, f in enumerate(firsts) if c in f}
+        if len(rmap) >= 3:
+            feats = []
+            for j, h in enumerate(head[1:], 1):
+                feats.append((h, {c: (rows[k][j] if j < len(rows[k]) else "") for c, k in rmap.items()}))
+            return feats, rmap
+    raise Fail("no comparison table naming at least 3 of caniscrape, scraperecon, ScrapeProbe, wafw00f")
+
+
+def d_check7():
+    """Comparison table: competitor cells agree with research reports 01 + 06; 'not found in the tools we checked'."""
+    files = sorted(RESEARCH.glob("01-*.md")) + sorted(RESEARCH.glob("06-*.md"))
+    need(len(files) >= 2, f"research reports 01/06 not found in {RESEARCH} (local folder, never committed)")
+    research = "\n".join(p.read_text(encoding="utf-8", errors="replace") for p in files)
+    per_tool = {}
+    for c in COMPETITORS:  # lines naming the tool + its '### ' section in report 06
+        own = [ln for ln in research.splitlines() if c in ln.lower()]
+        own += re.findall(rf"^###[^\n]*{c}[^\n]*\n(.*?)(?=^###|^## |\Z)", research, re.I | re.M | re.S)
+        per_tool[c] = "\n".join(own)
+    feats, cols = comparison_table()
+    probs, notes = [], []
+    miss = [c for c in COMPETITORS if c not in cols]
+    if miss:
+        probs.append(f"comparison lacks {miss}")
+    sec = section(9) if 9 in readme_layout()["spans"] else readme_layout()["text"]
+    if not re.search(r"not found in the tools we checked", sec, re.I):
+        probs.append("comparison does not use the wording 'not found in the tools we checked'")
+    if not re.search(r"2026-11-13|13 Nov(ember)? 2026|Nov(ember)? 13,? 2026|Nov(ember)? 2026", sec, re.I):
+        probs.append("comparison has no check date (research date 2026-11-13)")
+    absolute = re.findall(r"nobody (?:else )?(?:does|has|offers|tests)|no other tool|no one else|the only tool|"
+                          r"only tool that|first tool to|unlike any", readme_layout()["text"], re.I)
+    if absolute:
+        probs.append(f"absolute claims in README: {absolute[:3]}")
+    checked = 0
+    for feat, cells in feats:
+        f = re.sub(r"[*_`]", "", feat).strip()
+        rule = next((r for r in COMP_RULES if re.search(r[1], f, re.I)), None)
+        neg = bool(re.match(r"^(no|never|without|does not|doesn't|not)\b", f, re.I))
+        for comp, cell in cells.items():
+            for num in re.findall(r"\d+(?:[.,]\d+)?", re.sub(r"[*_`]", "", cell)):
+                if not re.search(rf"(?<![\d.,]){re.escape(num)}(?![\d])", per_tool[comp]):
+                    probs.append(f"{comp} / {f!r}: number {num} not in what research 01/06 says about {comp}")
+            k = cell_kind(cell)
+            if rule is None:
+                if k not in ("NO", "UNKNOWN"):
+                    probs.append(f"{comp} / {f!r} = {cell!r}: no research fact found for this row")
+                continue
+            name, _, truth, flip_ok = rule
+            if truth == "L":
+                if LICENCES[comp].lower() not in cell.lower():
+                    probs.append(f"{comp} licence cell {cell!r}, research says {LICENCES[comp]}")
+                continue
+            t = truth[COMPETITORS.index(comp)]
+            kk = k
+            if neg and flip_ok:
+                kk = {"YES": "NO", "NO": "YES", "DESC": "PARTIAL"}.get(k, k)
+            allowed = {"Y": {"YES", "PARTIAL", "DESC"}, "P": {"YES", "PARTIAL", "DESC", "NO", "UNKNOWN"},
+                       "N": {"NO", "UNKNOWN"}, "U": {"NO", "UNKNOWN"}}[t]
+            checked += 1
+            if kk not in allowed:
+                say = {"Y": "has it", "N": "lacks it", "U": "does not say (so: not found)"}[t]
+                probs.append(f"{comp} / {f!r} = {cell!r} (rule '{name}'{', negated' if neg else ''}): research {say}")
+        if rule is None:
+            notes.append(f.strip()[:40])
+    need(not probs, f"{len(probs)} problem(s): " + " | ".join(probs[:10]))
+    extra = f"; rows with no research rule (all competitors 'no'): {notes}" if notes else ""
+    return f"{len(feats)} rows, {checked} competitor cells agree with research 01/06, wording ok{extra}"
+
+
+def _changelog_entries(text: str) -> list:
+    """[(heading title, body)] for '## ' entries."""
+    hs = [(i, t) for i, lvl, t in md_headings(text) if lvl == 2]
+    lines = text.splitlines()
+    return [(t, "\n".join(lines[i + 1:(hs[k + 1][0] if k + 1 < len(hs) else len(lines))])) for k, (i, t) in enumerate(hs)]
+
+
+def d_check8():
+    """CHANGELOG.md has 1.3.0 and 1.2.0 matching git history; pyproject keywords + classifiers; pip install . works."""
+    probs = []
+    text = _read(REPO / "CHANGELOG.md")
+    ents = _changelog_entries(text)
+    titles = [t for t, _ in ents]
+    idx = {v: next((k for k, t in enumerate(titles) if re.search(rf"\[?v?{re.escape(v)}\]?(?![\d.])", t)), None)
+           for v in ("1.3.0", "1.2.0")}
+    for v, k in idx.items():
+        if k is None:
+            probs.append(f"no '## [{v}]' entry (headings: {titles[:6]})")
+    if not re.search(r"keep a changelog|keepachangelog", text, re.I):
+        probs.append("does not reference Keep a Changelog")
+    if None not in idx.values():
+        a, b = idx["1.3.0"], idx["1.2.0"]
+        if not a < b:
+            probs.append("1.3.0 must come before 1.2.0 (newest first)")
+        earlier = [t for t in titles[b + 1:] if re.search(r"earlier|older|before|history|\b1\.[01]\b|\b0\.\d", t, re.I)]
+        if not earlier:
+            probs.append(f"no short 'earlier' entry after 1.2.0 (headings after it: {titles[b + 1:]})")
+        b13, b12 = ents[a][1], ents[b][1]
+        if not re.search(r"^###\s+(Added|Changed|Fixed|Removed|Deprecated|Security)\b", b13, re.M):
+            probs.append("1.3.0 has no Keep a Changelog '### Added/Changed/Fixed' groups")
+        for rx, what in ((r"signature|guard", "passive guard signatures"), (r"\blog", "logging / scout.log"),
+                         (r"schema", "report schema"), (r"--output", "--output -"), (r"exit code", "exit codes"),
+                         (r"\bCI\b|github actions|continuous integration", "CI"), (r"pytest|ruff", "pytest/ruff"),
+                         (r"robots", "verdict fix when robots forbids the start page")):
+            if not re.search(rx, b13, 0 if "CI" in rx else re.I):
+                probs.append(f"1.3.0 entry omits {what} (in git history for 1.3.0)")
+        for rx, what in ((r"pip|pyproject|packag|install", "packaging / pip install"), (r"licen[cs]e|\bMIT\b", "licence"),
+                         (r"honest|identity|user.?agent", "honest identity"), (r"robots", "robots token check")):
+            if not re.search(rx, b12, re.I):
+                probs.append(f"1.2.0 entry omits {what} (in git history for 1.2.0)")
+        for rx, what in ((r"exit code", "exit codes"), (r"--output|schema_version|report\.schema", "machine output"),
+                         (r"\bCI\b|github actions", "CI"), (r"\bruff\b|\bpytest\b", "pytest/ruff"),
+                         (r"scout\.log|--quiet", "logging")):
+            if re.search(rx, b12, 0 if "CI" in rx else re.I):
+                probs.append(f"1.2.0 entry claims {what}, which git history puts in 1.3.0")
+        dates = {}
+        for v, k in idx.items():
+            m = re.search(r"(\d{4}-\d{2}-\d{2})", titles[k])
+            if m:
+                dates[v] = m.group(1)
+            elif not re.search(r"unreleased", titles[k], re.I):
+                probs.append(f"{v} heading has no ISO date: {titles[k]!r}")
+        if has_git():
+            rc, out = run(["git", "log", "--format=%ad", "--date=short", "-S", 'version = "1.3.0"', "--", "pyproject.toml"],
+                          cwd=REPO, timeout=60)
+            bump = min(out.split()) if rc == 0 and out.split() else None
+            if bump and dates.get("1.3.0") and dates["1.3.0"] < bump:
+                probs.append(f"1.3.0 dated {dates['1.3.0']}, before the commit that set it ({bump})")
+        if dates.get("1.3.0") and dates.get("1.2.0") and dates["1.2.0"] > dates["1.3.0"]:
+            probs.append(f"1.2.0 dated after 1.3.0 ({dates['1.2.0']} > {dates['1.3.0']})")
+    proj = tomllib.loads(_read(REPO / "pyproject.toml")).get("project", {})
+    kw = proj.get("keywords") or []
+    cls = proj.get("classifiers") or []
+    if len(kw) < 3 or not any(re.search(r"scrap", k, re.I) for k in kw):
+        probs.append(f"pyproject keywords {kw!r}: want 3+ including a scraping keyword")
+    if not cls:
+        probs.append("pyproject has no classifiers")
+    try:
+        import trove_classifiers as tc
+        unknown = [c for c in cls if c not in tc.classifiers]
+        how = "trove-classifiers"
+    except ImportError:
+        unknown = [c for c in cls if not re.fullmatch(r"[A-Z][\w ./()+-]*( :: [\w ./()+-]+)+", c)]
+        how = "format only (trove-classifiers not installed)"
+    if unknown:
+        probs.append(f"invalid classifiers ({how}): {unknown[:4]}")
+    pyv = [c.rsplit("::", 1)[1].strip() for c in cls if re.match(r"Programming Language :: Python :: 3\.\d+$", c)]
+    low = [v for v in pyv if tuple(map(int, v.split("."))) < (3, 10)]
+    if low:
+        probs.append(f"classifiers claim Python {low}, requires-python is >=3.10")
+    lic = [c for c in cls if c.startswith("License ::")]
+    if lic and not any("MIT" in c for c in lic):
+        probs.append(f"licence classifier {lic} is not MIT")
+    need(not probs, " | ".join(probs[:10]))
+    if RESULTS.get("p1", (False,))[0]:
+        inst = "pip install . ok (phase-1 check 1 passed this run)"
+    else:
+        inst = "pip install . ok: " + p_check1()
+    return f"CHANGELOG 1.3.0/1.2.0/earlier ok; {len(kw)} keywords, {len(cls)} classifiers ({how}); {inst}"
+
+
+def d_check9():
+    """Privacy: check-7 rules, no private terms or AI-tool names in tracked files or commits; ID-noreply author only."""
+    info = p_check7()
+    probs = []
+    rc, out = run(["git", "log", "--format=%an <%ae>%n%cn <%ce>%n%B%n@@END@@"], cwd=REPO, timeout=60)
+    need(rc == 0 and out.strip(), f"git log failed (rc {rc})")
+    commits = [c.strip() for c in out.split("@@END@@") if c.strip()]
+    people = {ln.strip() for c in commits for ln in c.splitlines()[:2]}
+    if people != {AUTHOR}:
+        probs.append(f"authors/committers other than {AUTHOR}: {sorted(people - {AUTHOR})}")
+    msgs = "\n".join("\n".join(c.splitlines()[2:]) for c in commits)
+    for rx, what in ((PRIVATE_RE, "private terms"), (AI_TOOL_RE, "AI tool/vendor names"),
+                     (r"co-authored-by|generated with", "attribution lines")):
+        hits = [ln.strip()[:80] for ln in msgs.splitlines() if re.search(rx, ln, re.I)]
+        if hits:
+            probs.append(f"commit messages contain {what}: {len(hits)} line(s)")
+    ai_rx = "cla" + "ude|anth" + "ropic"
+    rc, out = run(["git", "grep", "-nIiE", ai_rx], cwd=REPO, timeout=60)
+    if rc != 1:
+        probs.append(f"tracked files mention the AI vendor/tool: {[ln[:80] for ln in out.splitlines()[:5]]}")
+    rc, out = run(["git", "ls-files", "--others", "--exclude-standard"], cwd=REPO, timeout=60)
+    for f in [x.strip() for x in out.splitlines() if x.strip()]:
+        p = REPO / f
+        if p.is_file() and p.stat().st_size < 2_000_000 and re.search(ai_rx, f + p.read_text("utf-8", "ignore"), re.I):
+            probs.append(f"new file {f} mentions the AI vendor/tool")
+    rc, out = run(["git", "grep", "-IohE", r"[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+"], cwd=REPO, timeout=60)
+    ok_mail = {"muhammadadil97113@gmail.com", AUTHOR.split("<")[1].rstrip(">"), "git@github.com"}
+    mails = {m for m in out.split() if m not in ok_mail and not re.search(
+        r"@(example\.(com|org|net)|[\w.-]+\.(test|invalid|example|localhost))$|@localhost$", m, re.I)}
+    if mails:
+        probs.append(f"tracked files contain e-mail addresses other than the public contact: {sorted(mails)[:5]}")
+    need(not probs, " | ".join(probs[:8]))
+    return f"{info}; {len(commits)} commits by {AUTHOR}; no AI names, attribution lines or stray e-mails"
+
+
+def d_check10():
+    """All earlier hidden checks (phase 2: 1-11 incl. pytest 9 and ruff 10; phase 1: p1, p3-p8) still pass."""
+    for k in EARLIER:
+        if k in RESULTS:
+            continue
+        t0 = time.time()
+        try:
+            info = CHECKS[k]()
+            RESULTS[k] = (True, info)
+        except Fail as e:
+            RESULTS[k] = (False, str(e))
+        except Exception as e:
+            RESULTS[k] = (False, f"crashed {type(e).__name__}: {e}")
+        print(f"      (d10 ran check {k}: {'PASS' if RESULTS[k][0] else 'FAIL'}, {time.time() - t0:.0f}s)", flush=True)
+    bad = [k for k in EARLIER if not RESULTS[k][0]]
+    need(not bad, f"earlier hidden checks failing: {bad}: " + " | ".join(f"{k}: {RESULTS[k][1][:120]}" for k in bad[:4]))
+    return (f"all {len(EARLIER)} earlier checks pass (pytest = check 9, ruff = check 10). NOT checked here: CI green on "
+            f"origin/main after the push - the lead verifies that")
+
+
+CHECKS = {"d1": d_check1, "d2": d_check2, "d3": d_check3, "d4": d_check4, "d5": d_check5, "d6": d_check6,
+          "d7": d_check7, "d9": d_check9,
+          "1": check1, "2": check2, "3": check3, "4": check4, "5": check5, "6": check6, "7": check7,
           "8": check8, "9": check9, "10": check10, "11": check11,
           "p1": p_check1, "p3": p_check3, "p4": p_check4, "p5": p_check5, "p6": p_check6,
-          "p7": p_check7, "p8": p_check8}
+          "p7": p_check7, "p8": p_check8,
+          "d8": d_check8, "d10": d_check10}
 
 
 def main(argv):
@@ -1289,19 +2251,19 @@ def main(argv):
     if unknown:
         print(f"unknown check(s): {unknown}; valid: {' '.join(CHECKS)}")
         return 2
-    results = {}
     for n in pick:
         t0 = time.time()
         try:
             info = CHECKS[n]()
-            results[n] = True
+            RESULTS[n] = (True, info)
             print(f"PASS  check {n:>3} ({time.time() - t0:.0f}s): {info}", flush=True)
         except Fail as e:
-            results[n] = False
+            RESULTS[n] = (False, str(e))
             print(f"FAIL  check {n:>3} ({time.time() - t0:.0f}s): {e}", flush=True)
         except Exception as e:
-            results[n] = False
+            RESULTS[n] = (False, f"crashed {type(e).__name__}: {e}")
             print(f"FAIL  check {n:>3} ({time.time() - t0:.0f}s): check crashed {type(e).__name__}: {e}", flush=True)
+    results = {n: RESULTS[n][0] for n in pick}
     shutil.rmtree(TMP_ROOT, ignore_errors=True)
     failed = [n for n, ok in results.items() if not ok]
     print(f"\n{len(results) - len(failed)}/{len(results)} passed" + (f"; failed: {failed}" if failed else ""))
