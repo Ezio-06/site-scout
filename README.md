@@ -17,9 +17,17 @@ Run it before every scraping job, so the engine is built with full context inste
 ## Setup (once)
 
 ```bash
-pip install -r requirements.txt
-python -m playwright install chromium      # optional: enables the browser checks
+pip install .                       # core: plain-request checks
+pip install .[browser,tls]          # optional: real-browser checks + Chrome-fingerprint check
+python -m playwright install chromium   # only with the browser extra
 ```
+
+Then run `site-scout https://example.com/shop` (or `python run_scout.py ...`). On Windows, double-click
+`setup.bat` once, then `scout.bat`.
+
+By default the scout identifies itself honestly (`SiteScout/<version> (+repo URL)`) and obeys robots.txt rules
+for both `SiteScout` and `*`. If a site refuses that identity, it makes ONE labelled comparison request with a
+Chrome identity and says so on the card. `--identity browser` uses Chrome from the start.
 
 Without Playwright everything still runs. The card just lists the browser checks as "not tested".
 
@@ -147,3 +155,10 @@ scout/
 - Proxy rotation plug-in.
 - Reach test for **feed** paging and **browser-only** sites (v1.1 tests HTML/embedded paging only).
 - Find the site's own slicing levers (sub-areas, price filters) automatically when paging stops early.
+
+---
+
+## License and credits
+
+MIT, see `LICENSE`. Bot-guard signatures come from [wafw00f](https://github.com/EnableSecurity/wafw00f)
+(BSD-3-Clause); see `NOTICE` and `scout/data/WAFW00F_LICENSE`.

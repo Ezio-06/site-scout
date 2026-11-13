@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "site-scout"
+dynamic = ["version"]
+description = "Visit a website politely and write a scout card: how to scrape it, how hard, how fast."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Ezio-06" }]
+dependencies = [
+    "requests>=2.28",
+    "beautifulsoup4>=4.11",
+    "protego>=0.3",
+    "chompjs>=1.2",
+    "lxml>=4.9",
+]
+
+[project.optional-dependencies]
+browser = ["playwright>=1.40"]
+tls = ["curl_cffi>=0.7"]
+
+[project.urls]
+Homepage = "https://github.com/Ezio-06/site-scout"
+
+[project.scripts]
+site-scout = "scout.cli:main"
+
+[tool.setuptools]
+packages = ["scout", "scout.checks"]
+
+[tool.setuptools.package-data]
+scout = ["data/*.json", "data/WAFW00F_LICENSE"]
+
+[tool.setuptools.dynamic]
+version = { attr = "scout.__version__" }

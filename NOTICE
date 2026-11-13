@@ -1,0 +1,4 @@
+Site Scout uses bot-guard detection signatures derived from wafw00f
+(https://github.com/EnableSecurity/wafw00f), which is BSD-3-Clause licensed.
+The signatures are in scout/data/guard_signatures.json and the wafw00f licence
+text is in scout/data/WAFW00F_LICENSE.

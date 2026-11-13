@@ -1,7 +1,6 @@
+# Prefer:  pip install -e .[browser,tls]   (see pyproject.toml). Core list, for reference:
 requests>=2.28
 beautifulsoup4>=4.11
-protego>=0.3
-chompjs>=1.2        # reads JavaScript data blobs in pages (window.state = {...}) that strict JSON can't        # robots.txt rules with wildcard support (same parser Scrapy uses)
-curl_cffi>=0.7       # optional: tests the "copy Chrome's connection fingerprint" route on guarded sites
-lxml>=4.9          # optional but much faster parsing
-playwright>=1.40   # optional: browser checks. After install run: python -m playwright install chromium
+protego>=0.3      # robots.txt rules with wildcard support (same parser Scrapy uses)
+chompjs>=1.2      # reads JavaScript data blobs in pages that strict JSON can't
+lxml>=4.9         # faster parsing
