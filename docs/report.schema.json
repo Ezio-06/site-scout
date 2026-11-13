@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Ezio-06/site-scout/docs/report.schema.json",
+  "title": "Site Scout report.json",
+  "description": "Machine-readable result of one scout run. schema_version changes only when a field is removed or changes meaning; new fields can appear without a bump.",
+  "type": "object",
+  "required": ["schema_version", "url", "host", "when", "elapsed_s", "requests",
+               "signature_rules_skipped", "verdict", "facts", "checks", "config"],
+  "properties": {
+    "schema_version": {"const": 1, "description": "Layout version of this file."},
+    "url": {"type": "string", "description": "The start page that was scouted."},
+    "host": {"type": "string"},
+    "when": {"type": "string", "description": "Local time the report was written, ISO 8601 without zone."},
+    "elapsed_s": {"type": "number", "minimum": 0},
+    "requests": {"type": "integer", "minimum": 0, "description": "Requests made (plain and browser loads)."},
+    "signature_rules_skipped": {"type": "integer", "minimum": 0,
+                                "description": "Guard-signature rules ignored because they could not be compiled."},
+    "verdict": {
+      "type": "object",
+      "required": ["tier", "method", "difficulty", "why", "effort", "effort_hours", "effort_bumps",
+                   "safe_pace", "unknowns", "claims"],
+      "properties": {
+        "tier": {"enum": ["A", "B", "C", "D", "?"]},
+        "method": {"type": "string"},
+        "difficulty": {"type": "string"},
+        "why": {"type": "array", "items": {"type": "string"}},
+        "effort": {"enum": ["S", "M", "L", "XL", "?"]},
+        "effort_hours": {"type": "string"},
+        "effort_bumps": {"type": "array", "items": {"type": "string"}},
+        "safe_pace": {"type": "string"},
+        "unknowns": {"type": "array", "items": {"type": "string"}},
+        "claims": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["claim", "evidence", "detail"],
+            "properties": {
+              "claim": {"type": "string"},
+              "evidence": {"enum": ["verified", "broken", "seen", "assumed", "unknown"]},
+              "detail": {"type": "string"}
+            }
+          }
+        }
+      }
+    },
+    "facts": {
+      "type": "object",
+      "description": "What the checks found, shared between them. Keys vary by site.",
+      "properties": {
+        "guards": {"type": "array", "items": {"type": "string"},
+                   "description": "Bot guards judged PRESENT, each vendor once."},
+        "guards_possible": {"type": "array", "items": {"type": "string"},
+                            "description": "Vendor names that appeared only as words on a content-rich page."},
+        "hard_guard": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "checks": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["name", "title", "status"],
+        "properties": {
+          "name": {"type": "string"},
+          "title": {"type": "string"},
+          "status": {"enum": ["ok", "skipped", "error"]},
+          "findings": {"type": "object"},
+          "notes": {"type": "array", "items": {"type": "string"}},
+          "warnings": {"type": "array", "items": {"type": "string"}},
+          "reason": {"type": "string"},
+          "seconds": {"type": "number"}
+        }
+      }
+    },
+    "config": {"type": "object", "description": "The settings the run used."}
+  }
+}

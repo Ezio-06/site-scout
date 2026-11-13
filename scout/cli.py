@@ -41,6 +41,9 @@ def main(argv=None):
                         "request if the site refuses). browser: use Chrome's identity from the start")
     p.add_argument("--proxy", help="e.g. http://user:pass@host:port")
     p.add_argument("--out", help="output folder (default: scouts/<site>_<time>)")
+    p.add_argument("--output", choices=["-"], metavar="-",
+                   help="'-' writes report.json to stdout (and nothing else there); the summary and log "
+                        "go to stderr. The card files are still written to the output folder")
     p.add_argument("--only", help="comma-separated check names to run")
     p.add_argument("--skip", help="comma-separated check names to skip")
     p.add_argument("--list-checks", action="store_true", help="show available checks and exit")
@@ -49,10 +52,11 @@ def main(argv=None):
     p.add_argument("--version", action="version", version=f"site-scout {__version__}")
     a = p.parse_args(argv)
 
-    try:  # Windows consoles choke on some characters - never crash on printing
-        sys.stdout.reconfigure(errors="replace")
-    except Exception:
-        pass
+    for stream in (sys.stdout, sys.stderr):
+        try:  # Windows consoles choke on some characters - never crash on printing
+            stream.reconfigure(errors="replace")
+        except Exception:
+            pass
 
     if a.list_checks:
         for c in discover():
@@ -77,14 +81,24 @@ def main(argv=None):
     finally:
         logging.getLogger("scout").removeHandler(handler)
 
-    print()
-    print(f"  METHOD : {v['tier']} - {v['method']} ({v['difficulty']})")
-    print(f"  WHY    : {'; '.join(v['why'])}")
-    print(f"  PACE   : {v['safe_pace']}")
+    out = sys.stderr if a.output == "-" else sys.stdout    # with --output - stdout is JSON only
+    print(file=out)
+    print(f"  METHOD : {v['tier']} - {v['method']} ({v['difficulty']})", file=out)
+    print(f"  WHY    : {'; '.join(v['why'])}", file=out)
+    print(f"  PACE   : {v['safe_pace']}", file=out)
     print(f"  EFFORT : {v['effort']} ({v['effort_hours']})" +
-          (f"  raised by: {', '.join(v['effort_bumps'])}" if v["effort_bumps"] else ""))
+          (f"  raised by: {', '.join(v['effort_bumps'])}" if v["effort_bumps"] else ""), file=out)
     weak = [c for c in v.get("claims", []) if c["evidence"] in ("broken", "unknown")]
     for c in weak:
-        print(f"  {c['evidence'].upper():<7}: {c['claim']}" + (f" - {c['detail']}" if c["detail"] else ""))
-    print(f"\n  Scout card: {ctx.out_dir / 'scout_card.md'}")
+        print(f"  {c['evidence'].upper():<7}: {c['claim']}" + (f" - {c['detail']}" if c["detail"] else ""),
+              file=out)
+    print(f"\n  Scout card: {ctx.out_dir / 'scout_card.md'}", file=out)
+    if a.output == "-":
+        try:
+            sys.stdout.reconfigure(encoding="utf-8")
+        except Exception:
+            pass
+        sys.stdout.write((ctx.out_dir / "report.json").read_text(encoding="utf-8"))
+        sys.stdout.write("\n")
+        sys.stdout.flush()
     return 0

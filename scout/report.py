@@ -10,6 +10,8 @@ import traceback
 from . import __version__, guards
 from .config import EFFORT_BANDS
 
+SCHEMA_VERSION = 1   # layout of report.json; see docs/report.schema.json
+
 SIZES = ["S", "M", "L", "XL"]
 
 METHODS = {
@@ -402,6 +404,7 @@ def write(ctx, elapsed: float) -> dict:
 
     (ctx.out_dir / "scout_card.md").write_text(card, encoding="utf-8")
     report = {
+        "schema_version": SCHEMA_VERSION,
         "url": ctx.url, "host": ctx.host, "when": time.strftime("%Y-%m-%dT%H:%M:%S"),
         "elapsed_s": round(elapsed, 1), "requests": ctx.fetcher.count,
         "signature_rules_skipped": guards.skipped_rules(),
