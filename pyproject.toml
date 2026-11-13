@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "site-scout"
-dynamic = ["version"]
+version = "1.3.0"
 description = "Visit a website politely and write a scout card: how to scrape it, how hard, how fast."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -21,6 +21,7 @@ dependencies = [
 [project.optional-dependencies]
 browser = ["playwright>=1.40"]
 tls = ["curl_cffi>=0.7"]
+dev = ["pytest>=7", "ruff>=0.4", "jsonschema>=4"]
 
 [project.urls]
 Homepage = "https://github.com/Ezio-06/site-scout"
@@ -33,6 +34,3 @@ packages = ["scout", "scout.checks"]
 
 [tool.setuptools.package-data]
 scout = ["data/*.json", "data/WAFW00F_LICENSE"]
-
-[tool.setuptools.dynamic]
-version = { attr = "scout.__version__" }

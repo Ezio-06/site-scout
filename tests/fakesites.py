@@ -22,6 +22,7 @@
   /tarpit               plain requests hang, a real browser loads it -> guarded (tarpit), browser route
   /woo/page/N/          products whose class lists differ per item (post-N, instock/outofstock, first/last) -> one list; page 2 works
   /facets               filter panel with "+ More" expanders (aria-expanded) and no load-more -> NOT load-more
+  /private/list         disallowed by robots.txt -> never requested, and the verdict must still be written
   --- added 28 Oct from the Daraz product-page run (shapes, not copies) ---
   /redirect-gate        HTTP 200, no content, script clears a cookie and clicks a hidden link to another host -> blocked
   /goes-sour            rich page for the first request, then the redirect gate for good -> pace must NOT pass
@@ -155,6 +156,8 @@ fetch('/api/search?page=1').then(r=>r.json()).then(d=>{document.getElementById('
 
     def landmines_22oct(self, p, q):
         J = "application/json"
+        if p == "/private/list":     # robots.txt disallows /private/ - the scout must never ask for it
+            return self.send(200, shop("Private"))
         if p == "/shop-menu":
             return self.send(200, shop("Shop", extra=TURNSTILE))
         if p == "/cf-everywhere":

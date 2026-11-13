@@ -7,7 +7,7 @@ import socket
 import time
 import traceback
 
-from . import __version__
+from . import __version__, guards
 from .config import EFFORT_BANDS
 
 SIZES = ["S", "M", "L", "XL"]
@@ -33,10 +33,7 @@ def protection(f: dict) -> list:
     if f.get("tls_impersonation"):
         ev.append(f"filters scripted clients ({f.get('blocked_plain_python', 'blocked')} to plain Python, "
                   "passes with a Chrome connection fingerprint)")
-    if f.get("rules_forbid_start"):
-        method = "unknown"
-        why.append("the site's bot rules forbid this page, so nothing was fetched from it")
-    elif f.get("unreachable") and f.get("browser_passes_block"):
+    if f.get("unreachable") and f.get("browser_passes_block"):
         ev.append("plain requests hang or drop while a real browser loads the page (tarpit)")
     elif f.get("browser_passes_block"):
         ev.append("blocks plain requests, lets a real browser in")
@@ -61,7 +58,10 @@ def verdict(ctx) -> dict:
     protection(f)
 
     # ---- choose the method (best available route wins)
-    if f.get("unreachable") and f.get("browser_passes_block"):
+    if f.get("rules_forbid_start"):
+        method = "unknown"
+        why.append("the site's bot rules forbid this page, so nothing was fetched from it")
+    elif f.get("unreachable") and f.get("browser_passes_block"):
         method = "browser_guard"
         why.append("plain requests time out / drop, but a real browser loads the page")
     elif f.get("unreachable"):
@@ -224,6 +224,9 @@ def claims(ctx, v) -> list:
     if f.get("browser_triggered_block"):
         add("A real browser can be used on this site", "broken",
             f"plain requests were blocked right after the browser visit ({f['browser_triggered_block']})")
+    # guards (present = a header/cookie/status rule matched, or a thin page matched a body rule)
+    for g in f.get("guards") or []:
+        add(f"Bot guard: {g}", "seen", "matched in the start page's headers, cookies or text; not a block by itself")
     # identity
     ident = f.get("identity") or {}
     if ident.get("honest_ok") is True:
@@ -401,6 +404,7 @@ def write(ctx, elapsed: float) -> dict:
     report = {
         "url": ctx.url, "host": ctx.host, "when": time.strftime("%Y-%m-%dT%H:%M:%S"),
         "elapsed_s": round(elapsed, 1), "requests": ctx.fetcher.count,
+        "signature_rules_skipped": guards.skipped_rules(),
         "verdict": v, "facts": _clean(f),
         "checks": {k: _clean(r.__dict__) for k, r in ctx.results.items()},
         "config": _clean({k: getattr(ctx.cfg, k) for k in ctx.cfg.__dataclass_fields__}),

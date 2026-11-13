@@ -4,6 +4,7 @@ from __future__ import annotations
 import re
 
 from .base import Check, SkipCheck
+from .. import guards as guard_sigs
 from .. import signals
 
 # marker found in raw HTML (case-insensitive) -> technology
@@ -60,11 +61,14 @@ class Fingerprint(Check):
         }
 
         # ---- guards / blocks
-        guards = signals.guards_from_headers(r.headers) | signals.guards_from_cookies(r.cookies)
+        present, possible = guard_sigs.detect(r.status, r.headers, r.cookies, r.text)
+        guards = set(present)
         challenges = signals.challenges_in_body(r.text)
         out["guards"] = sorted(guards)
         out["challenge_markers"] = challenges
+        out["guards_possible"] = possible
         ctx.facts["guards"] = sorted(guards)
+        ctx.facts["guards_possible"] = possible
         ctx.facts["hard_guard"] = sorted(guards & HARD_GUARDS)
         rate = signals.rate_headers(r.headers)
         if rate:
@@ -80,6 +84,9 @@ class Fingerprint(Check):
             self.note(f"Plain request works: HTTP {r.status}, {r.size / 1024:.0f} KB in {r.elapsed_ms:.0f} ms.")
         if guards:
             self.note(f"Sits behind: {', '.join(sorted(guards))}.")
+        if possible:
+            self.note(f"A possible guard (only a word on a content-rich page, so not counted as present): "
+                      f"{', '.join(possible)}.")
         if ctx.facts["hard_guard"]:
             self.warn(f"Bot-management product detected ({', '.join(ctx.facts['hard_guard'])}) - "
                       "expect blocks at volume even if the first visits pass.")

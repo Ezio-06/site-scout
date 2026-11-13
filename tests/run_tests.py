@@ -117,6 +117,10 @@ CASES = {
         lambda c, v: None if c.results["location"].findings["expect"].get("24,990")
         else f"24,990 should match \"24990\" in the page data ({c.results['location'].findings['expect']})",
         {"expect": ["24,990", "Stand Mixer Pro 9000"]}),
+    # ---- phase 2: robots.txt forbids the start page - the verdict used to crash (NameError on `why`)
+    "robots-forbidden-start-has-a-verdict": (B + "/private/list", "never",
+        lambda c, v: None if "verdict failed" not in v["method"] and any("bot rules forbid" in w for w in v["why"])
+        else f"a forbidden start page must still give a verdict that says why (got {v['method']!r}, {v['why']})"),
 }
 
 
