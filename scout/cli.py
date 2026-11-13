@@ -21,8 +21,32 @@ from scout.report import write
 from scout.runner import run_scout
 
 
+EXIT_CODES = """exit codes:
+  0    the run finished (the card says how hard the site is)
+  2    usage error (bad flag, no URL)
+  3    the start page could not be reached
+  4    the site blocked every identity that was tried
+  5    robots.txt disallows the start page (nothing was requested from it)
+  130  stopped with Ctrl+C (the card is still written, with what was found so far)
+"""
+
+
+def exit_code(facts: dict) -> int:
+    """Map what the run found to the exit code documented in EXIT_CODES."""
+    if facts.get("interrupted"):
+        return 130
+    if facts.get("rules_forbid_start"):
+        return 5
+    if facts.get("unreachable") and not facts.get("browser_passes_block"):
+        return 3
+    if facts.get("blocked_at_start") and not facts.get("browser_passes_block"):
+        return 4
+    return 0
+
+
 def main(argv=None):
-    p = argparse.ArgumentParser(prog="site-scout", description="Scout a website before building a scraper.")
+    p = argparse.ArgumentParser(prog="site-scout", description="Scout a website before building a scraper.",
+                                epilog=EXIT_CODES, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("url", nargs="?", help="page to scout (ideally a listing/search-results page)")
     p.add_argument("--expect", action="append", default=[], metavar="TEXT",
                    help="a piece of text you can see on the page (product name, price...). "
@@ -101,4 +125,4 @@ def main(argv=None):
         sys.stdout.write((ctx.out_dir / "report.json").read_text(encoding="utf-8"))
         sys.stdout.write("\n")
         sys.stdout.flush()
-    return 0
+    return exit_code(ctx.facts)

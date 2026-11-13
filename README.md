@@ -52,7 +52,8 @@ Point it at a **listing / search-results page** (the page you'd scrape), not the
 | `--proxy http://user:pass@host:port` | Send traffic through a proxy (plain requests and browser). |
 | `--only robots,fingerprint` / `--skip pace` | Run a subset of checks. |
 | `--list-checks` | Show all checks. |
-| `-v` | Print every request as it happens. |
+| `-v` | Show DEBUG messages too (every request). `--quiet` shows warnings only. |
+| `--output -` | Write `report.json` to stdout and nothing else there (summary and log go to stderr). The card files are still written. Layout: `docs/report.schema.json`. |
 
 Output goes to `scouts/<site>_<time>/`:
 
@@ -60,6 +61,19 @@ Output goes to `scouts/<site>_<time>/`:
 - `report.json`: every finding, machine-readable.
 - `requests.log.json`: every request the scout made (for accountability).
 - `snapshots/`: the saved raw page, browser page, robots.txt and feeds. **Reuse these as test material for the scraper**, so its tests run without hitting the site.
+
+### Exit codes
+
+| Code | Meaning |
+|---|---|
+| 0 | The run finished (the card says how hard the site is). |
+| 2 | Usage error (bad flag, no URL). |
+| 3 | The start page could not be reached. |
+| 4 | The site blocked every identity that was tried (also with `--identity browser`). |
+| 5 | robots.txt disallows the start page, so nothing was requested from it. |
+| 130 | Stopped with Ctrl+C. The card is still written with what was found so far. |
+
+Every run also writes `scout.log` (DEBUG level) into the output folder.
 
 ## What it checks (in order)
 
@@ -139,6 +153,8 @@ scout/
   browser.py          lazy shared Chromium + network capture
   context.py          shared state passed to checks
   signals.py          bot-guard / challenge / rate-limit signatures
+  guards.py           matches the 171 guard signatures (scout/data) against responses already made
+  logsetup.py         logging: console + scout.log
   listing.py          item-list finder + fragility scoring
   jsontools.py        finds item lists inside JSON
   datatools.py        page data blobs, result totals, search engines, item IDs, telemetry filter
