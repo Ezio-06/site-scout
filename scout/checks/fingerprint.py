@@ -128,7 +128,9 @@ class Fingerprint(Check):
             self.note("Replies carry change markers (ETag/Last-Modified) - see caching check.")
 
         # ---- does the site filter by the default library identity?
-        if not r.blocked and r.ok:
+        # (skipped while running honest: that identity is already not a browser's, and the
+        # scout should not send a second, unlabelled identity)
+        if not r.blocked and r.ok and ctx.fetcher.identity == "browser":
             bare = ctx.get(ctx.url, plain_session=True, purpose="UA filter test")
             if bare.error is None:
                 filt = bare.status != r.status or bool(bare.blocked) or bare.size < r.size * 0.3

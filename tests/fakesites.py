@@ -24,8 +24,8 @@
   /facets               filter panel with "+ More" expanders (aria-expanded) and no load-more -> NOT load-more
   --- added 28 Oct from the Daraz product-page run (shapes, not copies) ---
   /redirect-gate        HTTP 200, no content, script clears a cookie and clicks a hidden link to another host -> blocked
-  /goes-sour            rich page for the first 2 requests, then the redirect gate for good -> pace must NOT pass
-  /goes-blank           rich page for the first 2 requests, then an empty 200 page (no guard words at all) -> soft block
+  /goes-sour            rich page for the first request, then the redirect gate for good -> pace must NOT pass
+  /goes-blank           rich page for the first request, then an empty 200 page (no guard words at all) -> soft block
   /browser-trips        plain requests fine until a real browser visits; from then on everything gets the gate
                         -> plain tests run first, the browser's damage is caught and named
   /price-format         price only in the page data as "24990"; you typed 24,990 from the screen -> found
@@ -272,7 +272,7 @@ fetch('/api/search?page=1').then(r=>r.json()).then(d=>{document.getElementById('
             return self.send(200, GATE)
         if p in ("/goes-sour", "/goes-blank"):
             HITS[p] = HITS.get(p, 0) + 1
-            if HITS[p] <= 2:
+            if HITS[p] <= 1:
                 return self.send(200, product)
             return self.send(200, GATE if p == "/goes-sour" else "<html><head></head><body></body></html>")
         if p == "/browser-trips":
