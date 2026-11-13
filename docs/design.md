@@ -20,7 +20,7 @@ Because there is only one door, a new check cannot bypass the rules, and the log
 ## Landmine method
 
 Each bug found in a real run becomes a small fake site in `tests/fakesites.py` plus a case in the landmine table
-(28 cases, one pytest test each). A case must fail on the old code before the fix goes in. The fake sites model traps such
+(29 cases, one pytest test each). A case must fail on the old code before the fix goes in. The fake sites model traps such
 as a "last page" that returns 200 with fallback content, pages that repeat, a soft block that shrinks the page, or a
 site that refuses the honest identity. The aim is to fix the pattern, not the one site that exposed it. The browser
 cases skip when Playwright is not installed.

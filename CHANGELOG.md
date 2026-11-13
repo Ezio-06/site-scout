@@ -13,6 +13,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - CI on Ubuntu (Python 3.10, 3.13) and Windows (Python 3.12).
 - Real example card for a scraping practice site in `examples/`, a rewritten README, `docs/holdout.md` and `docs/design.md`.
 
+### Fixed
+- A reply with no body by design (304 "not changed", 204) was judged a shrunk page / soft block. On sites that
+  support change markers this stopped every later request after the caching check and skipped the pace check.
+
 ### Changed
 - Prints replaced by logging.
 

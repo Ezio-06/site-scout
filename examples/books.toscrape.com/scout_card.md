@@ -1,7 +1,7 @@
 # Scout card - books.toscrape.com
 
 `https://books.toscrape.com/catalogue/category/books_1/index.html`  
-2026-11-13 22:15 - 6 requests - 12 s - ran from `home-pc`  
+2026-11-13 23:09 - 16 requests - 73 s - ran from `home-pc`  
 identity: honest (SiteScout user agent)  
 
 ## Verdict
@@ -10,7 +10,7 @@ identity: honest (SiteScout user agent)
 |---|---|
 | **Method** | **B - Plain fetch + parse HTML** (easy) |
 | Why | the content is in the raw page |
-| Safe pace | not tested |
+| Safe pace | 1 request per 6 s (tested) |
 | Effort | **S** (2-5 h, starting estimate) |
 | Size | ~1,000 items over ~50 list pages |
 
@@ -26,7 +26,7 @@ Only *verified* claims should go into a quote. Results are for this network only
 | About 1,000 items exist | **seen** | the site's own count |
 | Page 2 gives different items | **verified** |  |
 | Every item is reachable by paging | **verified** | the last page served real results |
-| Safe pace | **unknown** |  |
+| 1 request per 6 s is safe | **verified** | short test only - hourly/daily limits unknown |
 
 ## Findings
 
@@ -37,7 +37,7 @@ Only *verified* claims should go into a quote. Results are for this network only
 - No sitemap found - pages have to be discovered by following links.
 
 ### First look: response, guards, technology
-- Plain request works: HTTP 200, 49 KB in 643 ms.
+- Plain request works: HTTP 200, 49 KB in 645 ms.
 - Built with: jQuery.
 - Replies carry change markers (ETag/Last-Modified) - see caching check.
 
@@ -71,16 +71,19 @@ _browser was not used, no feed hints in source_
 ### Cheap re-checks (change markers)
 - Site answers 'not changed' (304, 0 bytes) instead of resending 49 KB - re-checks can be frequent and cheap.
 
-### Pace check (does the site stay normal?) *(skipped)*
-_site already pushed back (page shrank to 0 bytes from 50,607 (soft block))_
+### Pace check (does the site stay normal?)
+- Visiting 5 of the site's pages, 1 request every 6 s, 10 requests (~60 s).
+- No trouble up to 1 request per 6 s (~10/min) over 10 requests / 60 s. Short test from one connection - treat it as 'fine so far', not a guarantee.
+- Faster paces not tested (add --pace-fast to step up carefully).
+- Suggested scraper pace: 1 request per 6 s (the tested gentle pace).
 
 ### Browser check (run last, in its own room) *(skipped)*
 _nothing was waiting for the browser_
 
 ## Not tested / unknowns
 
-- Safe pace (pace check did not run - see its section).
 - Hidden data feeds: browser not used because the raw page looked complete (run with --browser always to hunt for feeds).
+- Speeds faster than the gentle pace (use --pace-fast).
 - Long-window limits (hourly/daily quotas) - a short test cannot see them.
 - How often the data changes (needs watch mode, planned for v2).
 

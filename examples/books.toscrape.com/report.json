@@ -2,9 +2,9 @@
   "schema_version": 1,
   "url": "https://books.toscrape.com/catalogue/category/books_1/index.html",
   "host": "books.toscrape.com",
-  "when": "2026-11-13T22:15:01",
-  "elapsed_s": 12.3,
-  "requests": 6,
+  "when": "2026-11-13T23:09:45",
+  "elapsed_s": 72.6,
+  "requests": 16,
   "signature_rules_skipped": 0,
   "verdict": {
     "tier": "B",
@@ -16,10 +16,10 @@
     "effort": "S",
     "effort_hours": "2-5 h",
     "effort_bumps": [],
-    "safe_pace": "not tested",
+    "safe_pace": "1 request per 6 s (tested)",
     "unknowns": [
-      "Safe pace (pace check did not run - see its section).",
       "Hidden data feeds: browser not used because the raw page looked complete (run with --browser always to hunt for feeds).",
+      "Speeds faster than the gentle pace (use --pace-fast).",
       "Long-window limits (hourly/daily quotas) - a short test cannot see them.",
       "How often the data changes (needs watch mode, planned for v2)."
     ],
@@ -55,9 +55,9 @@
         "detail": "the last page served real results"
       },
       {
-        "claim": "Safe pace",
-        "evidence": "unknown",
-        "detail": ""
+        "claim": "1 request per 6 s is safe",
+        "evidence": "verified",
+        "detail": "short test only - hourly/daily limits unknown"
       }
     ]
   },
@@ -128,7 +128,32 @@
       "share": 1.0,
       "evidence": "verified"
     },
-    "conditional_get": true
+    "conditional_get": true,
+    "pace": {
+      "pool": [
+        "https://books.toscrape.com/catalogue/category/books_1/index.html",
+        "https://books.toscrape.com/catalogue/category/books_1/page-2.html",
+        "https://books.toscrape.com/catalogue/a-light-in-the-attic_1000/index.html",
+        "https://books.toscrape.com/catalogue/tipping-the-velvet_999/index.html",
+        "https://books.toscrape.com/catalogue/soumission_998/index.html"
+      ],
+      "tested": [
+        {
+          "interval": 6.0,
+          "requests": 10,
+          "warning": null
+        }
+      ],
+      "clean_interval": 6.0,
+      "warning": null,
+      "rate_headers": {},
+      "duration_s": 60,
+      "requests": 10,
+      "latency_ms_median": 428,
+      "cut_short": null,
+      "stopped_for_allowance": false,
+      "recommended_interval": 6.0
+    }
   },
   "checks": {
     "robots": {
@@ -145,7 +170,7 @@
       ],
       "warnings": [],
       "reason": "",
-      "seconds": 1.43
+      "seconds": 1.41
     },
     "sitemap": {
       "name": "sitemap",
@@ -159,7 +184,7 @@
       ],
       "warnings": [],
       "reason": "",
-      "seconds": 0.78
+      "seconds": 0.8
     },
     "fingerprint": {
       "name": "fingerprint",
@@ -171,7 +196,7 @@
         "redirects": [],
         "bytes": 50607,
         "truncated": false,
-        "ms": 643,
+        "ms": 645,
         "content_type": "text/html",
         "server": null,
         "powered_by": null,
@@ -190,13 +215,13 @@
         "login_wall": false
       },
       "notes": [
-        "Plain request works: HTTP 200, 49 KB in 643 ms.",
+        "Plain request works: HTTP 200, 49 KB in 645 ms.",
         "Built with: jQuery.",
         "Replies carry change markers (ETag/Last-Modified) - see caching check."
       ],
       "warnings": [],
       "reason": "",
-      "seconds": 2.65
+      "seconds": 2.7
     },
     "tls": {
       "name": "tls",
@@ -281,7 +306,7 @@
       ],
       "warnings": [],
       "reason": "",
-      "seconds": 0.06
+      "seconds": 0.04
     },
     "network": {
       "name": "network",
@@ -351,7 +376,7 @@
       ],
       "warnings": [],
       "reason": "",
-      "seconds": 0.03
+      "seconds": 0.02
     },
     "reach": {
       "name": "reach",
@@ -395,7 +420,7 @@
       ],
       "warnings": [],
       "reason": "",
-      "seconds": 5.76
+      "seconds": 5.69
     },
     "caching": {
       "name": "caching",
@@ -415,17 +440,46 @@
       ],
       "warnings": [],
       "reason": "",
-      "seconds": 1.45
+      "seconds": 1.49
     },
     "pace": {
       "name": "pace",
       "title": "Pace check (does the site stay normal?)",
-      "status": "skipped",
-      "findings": {},
-      "notes": [],
+      "status": "ok",
+      "findings": {
+        "pool": [
+          "https://books.toscrape.com/catalogue/category/books_1/index.html",
+          "https://books.toscrape.com/catalogue/category/books_1/page-2.html",
+          "https://books.toscrape.com/catalogue/a-light-in-the-attic_1000/index.html",
+          "https://books.toscrape.com/catalogue/tipping-the-velvet_999/index.html",
+          "https://books.toscrape.com/catalogue/soumission_998/index.html"
+        ],
+        "tested": [
+          {
+            "interval": 6.0,
+            "requests": 10,
+            "warning": null
+          }
+        ],
+        "clean_interval": 6.0,
+        "warning": null,
+        "rate_headers": {},
+        "duration_s": 60,
+        "requests": 10,
+        "latency_ms_median": 428,
+        "cut_short": null,
+        "stopped_for_allowance": false,
+        "recommended_interval": 6.0
+      },
+      "notes": [
+        "Visiting 5 of the site's pages, 1 request every 6 s, 10 requests (~60 s).",
+        "No trouble up to 1 request per 6 s (~10/min) over 10 requests / 60 s. Short test from one connection - treat it as 'fine so far', not a guarantee.",
+        "Faster paces not tested (add --pace-fast to step up carefully).",
+        "Suggested scraper pace: 1 request per 6 s (the tested gentle pace)."
+      ],
       "warnings": [],
-      "reason": "site already pushed back (page shrank to 0 bytes from 50,607 (soft block))",
-      "seconds": 0.0
+      "reason": "",
+      "seconds": 60.23
     },
     "browser_room": {
       "name": "browser_room",
@@ -466,7 +520,7 @@
     "expect": [],
     "identity": "honest",
     "proxy": null,
-    "out_dir": "examples/books.toscrape.com",
+    "out_dir": "scouts/books.toscrape.com",
     "only": [],
     "skip": [],
     "verbose": false

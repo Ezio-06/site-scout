@@ -16,7 +16,7 @@ Every claim on the card carries an evidence level: **verified** (tested by fetch
 ## Example card
 
 A real run of v1.3.0 against [books.toscrape.com](https://books.toscrape.com/), a site built for scraping practice
-(6 requests, default polite settings). Excerpt:
+(16 requests, default polite settings). Excerpt:
 
 ```markdown
 ## Verdict
@@ -25,7 +25,7 @@ A real run of v1.3.0 against [books.toscrape.com](https://books.toscrape.com/), 
 |---|---|
 | **Method** | **B - Plain fetch + parse HTML** (easy) |
 | Why | the content is in the raw page |
-| Safe pace | not tested |
+| Safe pace | 1 request per 6 s (tested) |
 | Effort | **S** (2-5 h, starting estimate) |
 | Size | ~1,000 items over ~50 list pages |
 
@@ -39,6 +39,7 @@ A real run of v1.3.0 against [books.toscrape.com](https://books.toscrape.com/), 
 | About 1,000 items exist | **seen** | the site's own count |
 | Page 2 gives different items | **verified** |  |
 | Every item is reachable by paging | **verified** | the last page served real results |
+| 1 request per 6 s is safe | **verified** | short test only - hourly/daily limits unknown |
 ```
 
 Full card: [examples/books.toscrape.com/scout_card.md](examples/books.toscrape.com/scout_card.md)
@@ -139,7 +140,7 @@ Effort bands (S 2-5 h, M 5-12 h, L 12-25 h, XL 25 h+) are starting guesses; tune
 
 | Layer | What |
 |---|---|
-| Landmine fake sites | 28 cases in `tests/test_landmines.py`, each a small local fake site built to trip one past bug (soft blocks, fake last pages, repeating pages, honest-identity refusal and more). Every fix adds a case that fails on the old code. |
+| Landmine fake sites | 29 cases in `tests/test_landmines.py`, each a small local fake site built to trip one past bug (soft blocks, fake last pages, repeating pages, honest-identity refusal and more). Every fix adds a case that fails on the old code. |
 | Hidden acceptance checks | Written from the spec before the code, kept out of the builder's sight, run after each phase. |
 | Holdout | Labelled real sites, scored blind, with a lockbox rule. Latest: **95% out-of-sample** (109.5/115, 22 Oct 2026, v1.1). Method, per-check table and caveats: [docs/holdout.md](docs/holdout.md). |
 | CI | ruff and pytest on every push: Ubuntu / Python 3.10, Ubuntu / Python 3.13, Windows / Python 3.12 (Chromium installed). |
@@ -169,7 +170,7 @@ Facts below come from the projects' READMEs and source files as read in November
 | Rate / pace test | yes (gentle, stops at first sign) | yes (burst and sustained) | yes (opt-in) | not found | not found |
 | Grade of evidence per claim | yes (on every claim) | not found | partly (vendor guess only) | partly (evidence records, no grade) | not found |
 | Honest self-identifying user agent | yes | not found (random browser identity) | not found | yes | not found |
-| Fake-site test suite | yes (28 cases) | not found | not found | not found | not found |
+| Fake-site test suite | yes (29 cases) | not found | not found | not found | not found |
 | Sends attack-style probes | no | not found | not found | not found | yes, when the normal request is inconclusive (per its README) |
 
 Different goals, not a ranking: ScrapeProbe also covers terms of service and a time projection, caniscrape gives a 0-10
@@ -231,7 +232,6 @@ Never call `requests` directly: always go through `ctx.get` so the safety rules 
 
 - One connection cannot see hourly or daily quotas. The card says so every time.
 - Results hold for the network the scout ran from (shown on the card). Datacenter IPs are often treated differently; re-run from a server before moving a collector there.
-- On the example card the pace check was skipped by a known bug (a 304 "not changed" reply was mistaken for a soft block), so pace was not tested there.
 - The holdout result was measured on v1.1, and those sites are no longer a true holdout ([docs/holdout.md](docs/holdout.md)).
 - Effort bands are starting guesses, not measured quotes.
 
