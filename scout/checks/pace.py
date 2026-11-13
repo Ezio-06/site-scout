@@ -82,7 +82,7 @@ class Pace(Check):
             if rem is not None and str(rem).strip().isdigit() and int(rem) <= 2:
                 return f"rate-limit allowance nearly used up (remaining={rem})"
             first = state["sizes"].setdefault(url, r.size)
-            if first > 5000 and r.size < first * 0.3:
+            if not signals.bodyless(r.status) and first > 5000 and r.size < first * 0.3:
                 return f"page came back {r.size} bytes vs {first} before (likely a soft block)"
             state["lat"].append(r.elapsed_ms)
             base = statistics.median(state["lat"][:3]) if len(state["lat"]) >= 3 else None

@@ -105,6 +105,18 @@ fetch('/api/search?page=1').then(r=>r.json()).then(d=>{document.getElementById('
             return self.send(200, json.dumps({"results": items((n-1)*25, n*25, "spa"), "total": 3000, "page": n}), "application/json")
         if p == "/robots.txt":
             return self.send(200, "User-agent: *\nDisallow: /private/\n", "text/plain")
+        # 13 Nov (live example run): a rich page with change markers. The caching check's
+        # conditional GET gets a normal 304 with NO body - that is not a shrunk page / soft block.
+        if p == "/etag-list":
+            if self.headers.get("If-None-Match") == '"v1"':
+                self.send_response(304); self.send_header("ETag", '"v1"'); self.end_headers()
+                return None
+            per, total = 20, 1000
+            body = page_html("Books", items(0, per, "book"), total, 1, per, rel_next="/etag-list?page=2").encode()
+            self.send_response(200); self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("ETag", '"v1"'); self.send_header("Last-Modified", "Wed, 12 Nov 2026 10:00:00 GMT")
+            self.send_header("Content-Length", str(len(body))); self.end_headers(); self.wfile.write(body)
+            return None
         # 1. zameen-like: state blob (algolia format over elastic), deep pages fail past page 40
         m = re.match(r"^/Homes/Town-1-(\d+)\.html$", p)
         if m:

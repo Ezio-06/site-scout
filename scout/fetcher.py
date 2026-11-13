@@ -192,7 +192,11 @@ class PoliteFetcher:
         """28 Oct (Daraz): a page that was rich a minute ago comes back as an empty
         200. Whatever the guard, 'same address, content gone' is a soft block - judged
         against the FIRST good answer, never the previous one (40 identical block pages
-        in a row look perfectly steady)."""
+        in a row look perfectly steady).
+        13 Nov: replies that have no body BY DESIGN (304 'not changed', 204, HEAD answers)
+        are never judged by size - a 304 to our own conditional GET is the site being helpful."""
+        if signals.bodyless(res.status):
+            return None
         good = self._good.get(url)
         if good is None:
             if 200 <= res.status < 300 and not signals.is_thin(res.text):

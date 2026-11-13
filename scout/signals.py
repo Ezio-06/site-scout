@@ -83,6 +83,14 @@ RATE_HEADERS = (
 
 BLOCK_STATUSES = {401, 403, 407, 429, 503}
 
+# Statuses whose reply has no body by definition (RFC 9110): an empty answer here is
+# normal, so size/thinness rules (shrunk page, soft block) must never judge them.
+BODYLESS_STATUSES = {204, 304}
+
+
+def bodyless(status: int) -> bool:
+    return status in BODYLESS_STATUSES or 100 <= (status or 0) < 200
+
 
 def guards_from_headers(headers: dict) -> set:
     found = set()
