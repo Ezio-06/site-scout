@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import re
 
-from .base import Check
 from .. import datatools, htmltools, listing, signals
+from .base import Check
 
 SHELL_ROOT = re.compile(r'<div[^>]+id=["\'](root|app|__next|__nuxt|svelte|main-app)["\'][^>]*>\s*</div>', re.I)
 API_HINT = re.compile(r"""["'`]((?:https?:)?//[^"'`\s]+/(?:api|graphql|v\d)/[^"'`\s]*|/(?:api|graphql)/?[^"'`\s]*)["'`]""")

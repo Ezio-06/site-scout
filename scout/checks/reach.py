@@ -19,8 +19,9 @@ from __future__ import annotations
 import math
 import socket
 
+from .. import datatools, htmltools, listing
+from .. import paging as pg
 from .base import Check
-from .. import datatools, htmltools, listing, paging as pg
 
 MAX_PROBES = 10          # page fetches this check may spend
 KEEP_FOR_LATER = 12      # leave this many requests for the pace check

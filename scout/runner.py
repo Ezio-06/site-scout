@@ -49,7 +49,7 @@ def _run(ctx: ScoutContext, cfg: ScoutConfig, echo) -> ScoutContext:
     say(f"Scouting {cfg.url}")
     say(f"  output: {ctx.out_dir}")
     try:
-        for idx, cls in enumerate(checks):
+        for cls in checks:
             if "interrupted" in ctx.facts:
                 break
             chk = cls()

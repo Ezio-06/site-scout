@@ -8,8 +8,8 @@ from __future__ import annotations
 
 import statistics
 
-from .base import Check
 from .. import signals
+from .base import Check
 
 POOL_SIZE = 5
 
@@ -59,7 +59,7 @@ class Pace(Check):
     def _sequence(self, ctx, pool, interval, n, state, label) -> str | None:
         """Run n requests at `interval`. Return a warning string or None."""
         slow_streak = 0
-        for i in range(n):
+        for _ in range(n):
             if ctx.fetcher.remaining() <= 1 or ctx.fetcher.time_left() < interval + 5:
                 state["cut_short"] = "budget/time limit"
                 return None

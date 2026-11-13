@@ -208,7 +208,9 @@ def claims(ctx, v) -> list:
     'verified' claims should feed a quote."""
     f = ctx.facts
     out = []
-    add = lambda claim, ev, detail="": out.append({"claim": claim, "evidence": ev, "detail": detail})
+
+    def add(claim, ev, detail=""):
+        out.append({"claim": claim, "evidence": ev, "detail": detail})
 
     # route
     if f.get("feeds"):

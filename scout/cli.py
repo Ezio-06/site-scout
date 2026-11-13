@@ -20,7 +20,6 @@ from scout.logsetup import setup_console
 from scout.report import write
 from scout.runner import run_scout
 
-
 EXIT_CODES = """exit codes:
   0    the run finished (the card says how hard the site is)
   2    usage error (bad flag, no URL)
@@ -72,7 +71,7 @@ def main(argv=None):
     p.add_argument("--skip", help="comma-separated check names to skip")
     p.add_argument("--list-checks", action="store_true", help="show available checks and exit")
     p.add_argument("-v", "--verbose", action="store_true", help="show DEBUG messages too (every request)")
-    p.add_argument("--quiet", action="store_true", help="console shows warnings only (scout.log still gets everything)")
+    p.add_argument("--quiet", action="store_true", help="console shows warnings only (scout.log keeps all)")
     p.add_argument("--version", action="version", version=f"site-scout {__version__}")
     a = p.parse_args(argv)
 

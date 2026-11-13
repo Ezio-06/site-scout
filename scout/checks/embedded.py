@@ -10,9 +10,9 @@ from __future__ import annotations
 import json
 import re
 
-from .base import Check
 from .. import datatools, jsontools, listing
 from ..htmltools import contains
+from .base import Check
 
 
 def _types(obj, acc):

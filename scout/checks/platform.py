@@ -5,8 +5,8 @@ from __future__ import annotations
 import re
 from urllib.parse import urlsplit
 
-from .base import Check, SkipCheck
 from .. import jsontools
+from .base import Check, SkipCheck
 
 NEXT_BUILD = re.compile(r'"buildId"\s*:\s*"([^"]+)"')
 

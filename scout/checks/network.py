@@ -7,9 +7,9 @@ import json
 import re
 from urllib.parse import parse_qs, urlsplit
 
-from .base import Check, SkipCheck
 from .. import datatools, htmltools, jsontools
 from ..htmltools import contains
+from .base import Check, SkipCheck
 
 TRACKERS = re.compile(
     r"google-analytics|googletagmanager|doubleclick|googlesyndication|facebook\.|fbcdn|"

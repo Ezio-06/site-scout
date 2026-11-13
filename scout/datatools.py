@@ -17,7 +17,7 @@ import re
 from collections import deque
 
 try:
-    import chompjs   # parses JavaScript object literals (single quotes, undefined, trailing commas)
+    import chompjs  # parses JavaScript object literals (single quotes, undefined, trailing commas)
 except ImportError:  # pragma: no cover - falls back to strict JSON
     chompjs = None
 

@@ -3,9 +3,9 @@ from __future__ import annotations
 
 import re
 
-from .base import Check, SkipCheck
 from .. import guards as guard_sigs
 from .. import signals
+from .base import Check, SkipCheck
 
 # marker found in raw HTML (case-insensitive) -> technology
 TECH_MARKERS = [

@@ -15,8 +15,8 @@ from urllib.parse import urlsplit
 
 import requests
 
-from .config import BROWSER_HEADERS, ScoutConfig, headers_for
 from . import signals
+from .config import ScoutConfig, headers_for
 
 log = logging.getLogger("scout")
 _META_CHARSET = re.compile(rb"<meta[^>]+charset=[\"']?([A-Za-z0-9_\-]+)", re.I)

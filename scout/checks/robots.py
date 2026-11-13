@@ -1,9 +1,9 @@
 """robots.txt: what the site allows bots to visit, and how slowly."""
 from __future__ import annotations
 
-from .base import Check
 from ..config import BROWSER_HEADERS
 from ..context import BOT_TOKEN
+from .base import Check
 
 try:
     # Scrapy's robots.txt parser: understands wildcards (*, $) and longest-match rules.

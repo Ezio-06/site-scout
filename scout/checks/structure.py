@@ -5,8 +5,10 @@ from __future__ import annotations
 import math
 import re
 
+from .. import htmltools, signals
+from .. import paging as pg
+from ..signals import LOAD_MORE
 from .base import Check, SkipCheck
-from .. import htmltools, paging as pg
 
 NEXT_WORDS = re.compile(r"^\s*(next|next page|›|»|→|>|>>|далее|следующая|след\.?|suivant|weiter|"
                         r"siguiente|próxima|avanti|التالي|下一页)\s*$", re.I)
@@ -14,8 +16,7 @@ NEXT_WORDS = re.compile(r"^\s*(next|next page|›|»|→|>|>>|далее|сле�
 # plus the classic offset names and /page/N, /p2, /N.html path styles
 PAGE_HREF = re.compile(r"[?&][\w-]*(?:page|pag|pg)[\w-]*=\d+|[?&](?:p|pn|offset|start|from|skip|o)=\d+|"
                        r"/page/\d+|/p\d+/?$|/pagination/\d+", re.I)
-from ..signals import LOAD_MORE
-from .. import signals
+
 TOTAL = re.compile(
     r"\d+\s*[-–]\s*\d+\s+(?:of|из|von|de)\s+(\d[\d,.]{0,12}\d|\d)"
     r"|(\d[\d,.\u00a0\u202f]{0,12}\d|\d)\s+(?:results|items|products|listings|offers|ads|jobs|properties|"

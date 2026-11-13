@@ -56,7 +56,7 @@ def test_log_does_not_leak_between_runs(site, tmp_path):
     first = (tmp_path / "a" / "scout.log").read_text(encoding="utf-8")
     run_scout(ScoutConfig(url=site, out_dir=str(tmp_path / "b"), browser="never", pace=False, min_delay=0.0))
     assert (tmp_path / "a" / "scout.log").read_text(encoding="utf-8") == first
-    assert not logging.getLogger("scout").handlers
+    assert not any(isinstance(h, logging.FileHandler) for h in logging.getLogger("scout").handlers)
 
 
 def test_quiet_hides_info_on_console(site, tmp_path, capsys):

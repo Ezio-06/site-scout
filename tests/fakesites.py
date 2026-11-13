@@ -33,9 +33,13 @@
 
 Run everything:  python tests/run_tests.py      (starts this server itself)
 """
-import json, math, re, sys
+import json
+import math
+import re
+import sys
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from urllib.parse import urlsplit, parse_qs
+from urllib.parse import parse_qs, urlsplit
+
 
 def items(n0, n1, prefix):
     return [{"externalID": str(100000 + i), "title": f"{prefix} listing {i}", "price": 1000 + i * 7,
@@ -237,7 +241,7 @@ fetch('/api/search?page=1').then(r=>r.json()).then(d=>{document.getElementById('
                 f'<a href="/shop/item-{i}/"><img src="/i{i}.png"><h2 class="woocommerce-loop-product__title">Pokemon {i}</h2>'
                 f'<span class="price">£ {50 + i}.00</span></a><a href="?add-to-cart={i}" class="button">Add to basket</a></li>'
                 for i in range((n - 1) * per, n * per))
-            body = (f'<html><body class="archive woocommerce">' + "".join(f"<script>var w{i} = {{x: 'cfg {i}'}};</script>" for i in range(20))
+            body = ('<html><body class="archive woocommerce">' + "".join(f"<script>var w{i} = {{x: 'cfg {i}'}};</script>" for i in range(20))
                     + f'<main id="main"><p class="woocommerce-result-count">Showing {(n-1)*per+1}&ndash;{n*per} of {total} results</p>'
                     f'<ul class="products columns-4">{lis}</ul><nav class="woocommerce-pagination"><a href="/woo/page/{n+1}/" class="next">&rarr;</a>'
                     f'<a href="/woo/page/2/">2</a><a href="/woo/page/3/">3</a></nav></main></body></html>')

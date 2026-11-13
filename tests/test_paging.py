@@ -1,10 +1,13 @@
 """Page-address builder: every shape must rebuild the site's own links exactly.
-    python tests/test_paging.py           (from the repo root)
+    pytest tests/test_paging.py     (or: python tests/test_paging.py)
 """
 import sys
 from pathlib import Path
+
+import pytest
+
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from scout import paging as pg
+from scout import paging as pg  # noqa: E402
 
 CASES = [  # page 1, page 2 (as the site links it), per page, page to build, expected
     # the leading zero in 'region-01' was dropped -> false "paging broken"
@@ -20,12 +23,12 @@ CASES = [  # page 1, page 2 (as the site links it), per page, page to build, exp
     ("https://x.com/c?a=1&page=1", "https://x.com/c?page=2&a=1", None, 3, "https://x.com/c?a=1&page=3"),
 ]
 
-fails = 0
-for u1, u2, per, n, want in CASES:
+
+@pytest.mark.parametrize("u1,u2,per,n,want", CASES)
+def test_page_address(u1, u2, per, n, want):
     t = pg.template_from(u1, u2, per)
-    got = pg.url_for(t, n) if t else None
-    ok = got == want
-    fails += not ok
-    print(("  ok    " if ok else "  FAIL  ") + f"{u2}  ->  page {n}: {got}")
-print("all passed" if not fails else f"{fails} FAILED")
-sys.exit(1 if fails else 0)
+    assert (pg.url_for(t, n) if t else None) == want
+
+
+if __name__ == "__main__":
+    sys.exit(pytest.main([__file__, "-q"]))

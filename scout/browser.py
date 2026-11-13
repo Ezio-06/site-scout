@@ -9,8 +9,8 @@ from __future__ import annotations
 import time
 from dataclasses import dataclass, field
 
-from .config import BROWSER_UA, ScoutConfig
 from . import signals
+from .config import BROWSER_UA, ScoutConfig
 
 CHALLENGE_WAIT_S = 12   # how long to let a "checking your browser" page finish
 

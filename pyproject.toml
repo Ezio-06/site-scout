@@ -34,3 +34,23 @@ packages = ["scout", "scout.checks"]
 
 [tool.setuptools.package-data]
 scout = ["data/*.json", "data/WAFW00F_LICENSE"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+norecursedirs = ["hidden", "out", ".venv"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py310"
+extend-exclude = ["tests/out", "**/hidden"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B"]
+
+[tool.ruff.lint.per-file-ignores]
+# fake-site fixtures and the landmine table hold long HTML and one-line handlers on purpose
+"tests/*" = ["E501", "E702"]
+# phase-1 code with long message strings; wrapping them is cosmetic and left for a later cleanup.
+# New files and cli.py keep the 110 limit.
+"scout/checks/*" = ["E501"]
+"scout/{context,datatools,htmltools,report,signals}.py" = ["E501"]

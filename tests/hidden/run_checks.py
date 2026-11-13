@@ -49,11 +49,12 @@ import subprocess
 import sys
 import tempfile
 import time
-import tomllib
 import zipfile
 from collections import Counter
 from itertools import product
 from pathlib import Path
+
+import tomllib
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parent.parent

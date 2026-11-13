@@ -8,10 +8,10 @@ import time
 from pathlib import Path
 from urllib.parse import urljoin, urlsplit
 
+from . import htmltools, signals
 from .browser import BrowserSession, BrowserUnavailable, Rendered
 from .config import BROWSER_HEADERS, ScoutConfig
 from .fetcher import Fetched, PoliteFetcher
-from . import htmltools, signals
 
 BOT_TOKEN = "SiteScout"   # the name robots.txt rules can address us by
 
@@ -89,7 +89,7 @@ class ScoutContext:
             return self.robots
         if host in self._robots_other:
             return self._robots_other[host]
-        from .checks.robots import _Rules   # late import: checks depend on context, not the reverse
+        from .checks.robots import _Rules  # late import: checks depend on context, not the reverse
         r = self.get(f"{parts.scheme}://{parts.netloc}/robots.txt", purpose="robots.txt (other host)",
                      escalate=False)
         rules = None

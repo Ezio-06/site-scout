@@ -13,11 +13,12 @@ sys.path.insert(0, str(HERE.parent))
 sys.path.insert(0, str(HERE))
 os.environ["NO_PROXY"] = "127.0.0.1,localhost"
 
-import fakesites                                   # noqa: E402
-import scout.checks.reach as reach                 # noqa: E402
-from scout.config import ScoutConfig               # noqa: E402
-from scout.report import write                     # noqa: E402
-from scout.runner import run_scout                 # noqa: E402
+import fakesites  # noqa: E402
+
+import scout.checks.reach as reach  # noqa: E402
+from scout.config import ScoutConfig  # noqa: E402
+from scout.report import write  # noqa: E402
+from scout.runner import run_scout  # noqa: E402
 
 reach.MIN_GAP = 0          # local server - no need to be gentle
 PORT = 8799
@@ -124,27 +125,54 @@ CASES = {
 }
 
 
-def main():
+def browser_available() -> bool:
+    """True when Playwright AND a Chromium it can launch are present (checked once)."""
+    if "ok" not in _BROWSER:
+        try:
+            from playwright.sync_api import sync_playwright
+            with sync_playwright() as pw:
+                pw.chromium.launch().close()
+            _BROWSER["ok"] = True
+        except Exception:
+            _BROWSER["ok"] = False
+    return _BROWSER["ok"]
+
+
+_BROWSER: dict = {}
+
+
+def start_server():
     srv = ThreadingHTTPServer(("127.0.0.1", PORT), fakesites.H)
     threading.Thread(target=srv.serve_forever, daemon=True).start()
+    return srv
+
+
+def run_case(name, out_root):
+    """Run one landmine case. Returns an error string, or None when it passed."""
+    url, browser, check, *extra = CASES[name]
+    kw = {"pace": False, "min_delay": 0.0}
+    kw.update(extra[0] if extra else {})
+    cfg = ScoutConfig(url=url, browser=browser, out_dir=str(Path(out_root) / name), **kw)
+    t0 = time.time()
+    try:
+        ctx = run_scout(cfg, echo=lambda *a: None)
+        v = write(ctx, time.time() - t0)
+        crashed = [k for k, r in ctx.results.items() if r.status == "error"]
+        return check(ctx, v) or (f"checks crashed: {crashed}" if crashed else None)
+    except Exception as e:
+        return f"{type(e).__name__}: {e}"
+
+
+def main():
+    srv = start_server()
     out_root = HERE / "out"
     failed = 0
     only = set(sys.argv[1:])
-    for name, (url, browser, check, *extra) in CASES.items():
+    for name in CASES:
         if only and name not in only:
             continue
-        kw = {"pace": False, "min_delay": 0.0}
-        kw.update(extra[0] if extra else {})
-        cfg = ScoutConfig(url=url, browser=browser, out_dir=str(out_root / name), **kw)
-        t0 = time.time()
-        try:
-            ctx = run_scout(cfg, echo=lambda *a: None)
-            v = write(ctx, time.time() - t0)
-            crashed = [k for k, r in ctx.results.items() if r.status == "error"]
-            err = check(ctx, v) or (f"checks crashed: {crashed}" if crashed else None)
-        except Exception as e:
-            err = f"{type(e).__name__}: {e}"
-        if err and "browser" in str(err).lower() and browser == "always":
+        err = run_case(name, out_root)
+        if err and "browser" in str(err).lower() and CASES[name][1] == "always":
             print(f"  SKIP  {name}: browser not available")
             continue
         failed += bool(err)
