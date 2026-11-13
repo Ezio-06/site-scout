@@ -1,0 +1,3940 @@
+{
+ "source": "wafw00f plugins (BSD-3, EnableSecurity)",
+ "guards": {
+  "aesecure": {
+   "name": "aeSecure (aeSecure)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "aeSecure-code",
+      "re": ".+?"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "aesecure_denied\\.png"
+     }
+    ]
+   ]
+  },
+  "airee": {
+   "name": "AireeCDN (Airee)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "Airee"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "X-Cache",
+      "re": "(\\w+\\.)?airee\\.cloud"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "airee\\.cloud"
+     }
+    ]
+   ]
+  },
+  "airlock": {
+   "name": "Airlock (Phion/Ergon)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^al[_-]?(sess|lb)="
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "server detected a syntax error in your request"
+     }
+    ]
+   ]
+  },
+  "alertlogic": {
+   "name": "Alert Logic (Alert Logic)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "<(title|h\\d{1})>requested url cannot be found"
+     },
+     {
+      "t": "body",
+      "re": "we are sorry.{0,10}?but the page you are looking for cannot be found"
+     },
+     {
+      "t": "body",
+      "re": "back to previous page"
+     },
+     {
+      "t": "body",
+      "re": "proceed to homepage"
+     },
+     {
+      "t": "body",
+      "re": "reference id"
+     }
+    ]
+   ]
+  },
+  "aliyundun": {
+   "name": "AliYunDun (Alibaba Cloud Computing)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "error(s)?\\.aliyun(dun)?\\.(com|net)?"
+     },
+     {
+      "t": "body",
+      "re": "alicdn\\.com\\/sd\\-base\\/static\\/\\d{1,2}\\.\\d{1,2}\\.\\d{1,2}\\/image\\/405\\.png"
+     },
+     {
+      "t": "body",
+      "re": "Sorry, your request has been blocked as it may cause potential threats to the server\\'s security."
+     },
+     {
+      "t": "status",
+      "code": 405
+     }
+    ]
+   ]
+  },
+  "anquanbao": {
+   "name": "Anquanbao (Anquanbao)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "X-Powered-By-Anquanbao",
+      "re": ".+?"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "aqb_cc/error/"
+     }
+    ]
+   ]
+  },
+  "anubis": {
+   "name": "Anubis (Techaro)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "-anubis-auth="
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "/\\.within\\.website/x/cmd/anubis/"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "<script id=\"anubis_version\""
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "<script id=\"anubis_challenge\""
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "Protected by.*Anubis.*From.*Techaro"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "github\\.com/TecharoHQ/anubis"
+     }
+    ]
+   ]
+  },
+  "anyu": {
+   "name": "AnYu (AnYu Technologies)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "anyu.{0,10}?the green channel"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "your access has been intercepted by anyu"
+     }
+    ]
+   ]
+  },
+  "applicationgateway": {
+   "name": "Azure Application Gateway (Microsoft)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "<center>Microsoft-Azure-Application-Gateway/v2</center>"
+     },
+     {
+      "t": "body",
+      "re": "<h1>403 Forbidden</h1>"
+     }
+    ]
+   ]
+  },
+  "approach": {
+   "name": "Approach (Approach)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "approach.{0,10}?web application (firewall|filtering)"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "approach.{0,10}?infrastructure team"
+     }
+    ]
+   ]
+  },
+  "armor": {
+   "name": "Armor Defense (Armor)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "blocked by website protection from armor"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "please create an armor support ticket"
+     }
+    ]
+   ]
+  },
+  "arvancloud": {
+   "name": "ArvanCloud (ArvanCloud)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "ArvanCloud"
+     }
+    ]
+   ]
+  },
+  "aspa": {
+   "name": "ASPA Firewall (ASPA Engineering Co.)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "ASPA[\\-_]?WAF"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "ASPA-Cache-Status",
+      "re": ".+?"
+     }
+    ]
+   ]
+  },
+  "aspnetgen": {
+   "name": "ASP.NET Generic (Microsoft)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "iis (\\d+.)+?detailed error"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "potentially dangerous request querystring"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "application error from being viewed remotely (for security reasons)?"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "An application error occurred on the server"
+     }
+    ]
+   ]
+  },
+  "astra": {
+   "name": "Astra (Czar Securities)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^cz_astra_csrf_cookie"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "astrawebsecurity\\.freshdesk\\.com"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "www\\.getastra\\.com/assets/images"
+     }
+    ]
+   ]
+  },
+  "awswaf": {
+   "name": "AWS Elastic Load Balancer (Amazon)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "X-AMZ-ID",
+      "re": ".+?"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "X-AMZ-Request-ID",
+      "re": ".+?"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^aws.?alb="
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "aws.?elb"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "X-Blocked-By-WAF",
+      "re": "Blocked_by_custom_response_for_AWSManagedRules.*"
+     }
+    ]
+   ]
+  },
+  "azion": {
+   "name": "Azion Edge Firewall (Azion)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "x-azion-edge-pop",
+      "re": ".+?"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "x-azion-request-id",
+      "re": ".+?"
+     }
+    ]
+   ]
+  },
+  "baffinbay": {
+   "name": "Baffin Bay (Mastercard)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "server",
+      "re": "baffin-bay-inlet"
+     }
+    ]
+   ]
+  },
+  "baidu": {
+   "name": "Yunjiasu (Baidu Cloud Computing)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "yunjiasu.*"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "href=\"/.well-known/yunjiasu-cgi/"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "document.cookie='yjs_use_ob=0"
+     }
+    ]
+   ]
+  },
+  "barikode": {
+   "name": "Barikode (Ethic Ninja)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "<strong>barikode<.strong>"
+     }
+    ]
+   ]
+  },
+  "barracuda": {
+   "name": "Barracuda (Barracuda Networks)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^barra_counter_session="
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^BNI__BARRACUDA_LB_COOKIE="
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^BNI_persistence="
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^BN[IE]S_.*?="
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "Barracuda.Networks"
+     }
+    ]
+   ]
+  },
+  "bekchy": {
+   "name": "Bekchy (Faydata Technologies Inc.)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "Bekchy.{0,10}?Access Denied"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "bekchy\\.com/report"
+     }
+    ]
+   ]
+  },
+  "beluga": {
+   "name": "Beluga CDN (Beluga)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "Beluga"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^beluga_request_trail="
+     }
+    ]
+   ]
+  },
+  "binarysec": {
+   "name": "BinarySec (BinarySec)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "BinarySec"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "x-binarysec-via",
+      "re": ".+"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "x-binarysec-nocache",
+      "re": ".+"
+     }
+    ]
+   ]
+  },
+  "bitninja": {
+   "name": "BitNinja (BitNinja)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "Security check by BitNinja"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "Visitor anti-robot validation"
+     }
+    ]
+   ]
+  },
+  "blockdos": {
+   "name": "BlockDoS (BlockDoS)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "blockdos\\.net"
+     }
+    ]
+   ]
+  },
+  "bluedon": {
+   "name": "Bluedon (Bluedon IST)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "BDWAF"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "bluedon web application firewall"
+     }
+    ]
+   ]
+  },
+  "bulletproof": {
+   "name": "BulletProof Security Pro (AITpro Security)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "\\+?bpsMessage"
+     },
+     {
+      "t": "body",
+      "re": "403 Forbidden Error Page"
+     },
+     {
+      "t": "body",
+      "re": "If you arrived here due to a search"
+     }
+    ]
+   ]
+  },
+  "cachefly": {
+   "name": "CacheFly CDN (CacheFly)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "BestCDN",
+      "re": "Cachefly"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^cfly_req.*="
+     }
+    ]
+   ]
+  },
+  "cachewall": {
+   "name": "CacheWall (Varnish)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "Varnish"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "X-Varnish",
+      "re": ".+"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "X-Cachewall-Action",
+      "re": ".+?"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "X-Cachewall-Reason",
+      "re": ".+?"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "security by cachewall"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "403 naughty.{0,10}?not nice!"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "varnish cache server"
+     }
+    ]
+   ]
+  },
+  "cdnns": {
+   "name": "CdnNS Application Gateway (CdnNs/WdidcNet)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "cdnnswaf application gateway"
+     }
+    ]
+   ]
+  },
+  "cerber": {
+   "name": "WP Cerber Security (Cerber Tech)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "your request looks suspicious or similar to automated"
+     },
+     {
+      "t": "body",
+      "re": "our server stopped processing your request"
+     },
+     {
+      "t": "body",
+      "re": "We.re sorry.{0,10}?you are not allowed to proceed"
+     },
+     {
+      "t": "body",
+      "re": "requests from spam posting software"
+     },
+     {
+      "t": "body",
+      "re": "<title>403 Access Forbidden"
+     }
+    ]
+   ]
+  },
+  "chinacache": {
+   "name": "ChinaCache Load Balancer (ChinaCache)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Powered-By-ChinaCache",
+      "re": ".+"
+     }
+    ]
+   ]
+  },
+  "chuangyu": {
+   "name": "Chuang Yu Shield (Yunaq)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "www\\.365cyd\\.com"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "help\\.365cyd\\.com/cyd\\-error\\-help.html\\?code=403"
+     }
+    ]
+   ]
+  },
+  "ciscoacexml": {
+   "name": "ACE XML Gateway (Cisco)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "ACE XML Gateway"
+     }
+    ]
+   ]
+  },
+  "cloudbric": {
+   "name": "Cloudbric (Penta Security)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "<title>Cloudbric.{0,5}?ERROR!"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "Your request was blocked by Cloudbric"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "please contact Cloudbric Support"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "cloudbric\\.zendesk\\.com"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "Cloudbric Help Center"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "malformed request syntax.{0,4}?invalid request message framing.{0,4}?or deceptive request routing"
+     }
+    ]
+   ]
+  },
+  "cloudflare": {
+   "name": "Cloudflare (Cloudflare Inc.)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "server",
+      "re": "cloudflare"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "server",
+      "re": "cloudflare[-_]nginx"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "cf-ray",
+      "re": ".+?"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "__cfduid"
+     }
+    ]
+   ]
+  },
+  "cloudfloordns": {
+   "name": "Cloudfloor (Cloudfloor DNS)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "CloudfloorDNS(.WAF)?"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "<(title|h\\d{1})>CloudfloorDNS.{0,6}?Web Application Firewall Error"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "www\\.cloudfloordns\\.com/contact"
+     }
+    ]
+   ]
+  },
+  "cloudfront": {
+   "name": "Cloudfront (Amazon)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "Cloudfront"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Via",
+      "re": "([0-9\\.]+?)? \\w+?\\.cloudfront\\.net \\(Cloudfront\\)"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "X-Amz-Cf-Id",
+      "re": ".+?"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "X-Cache",
+      "re": "Error from Cloudfront"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "Generated by cloudfront \\(CloudFront\\)"
+     }
+    ]
+   ]
+  },
+  "cloudprotector": {
+   "name": "Cloud Protector (Rohde & Schwarz CyberSecurity)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "Cloud Protector.*?by Rohde.{3,8}?Schwarz Cybersecurity"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "<a href='https?:\\/\\/(?:www\\.)?cloudprotector\\.com\\/'>R.{1,6}?S.Cloud Protector"
+     }
+    ]
+   ]
+  },
+  "comodo": {
+   "name": "Comodo cWatch (Comodo CyberSecurity)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "Protected by COMODO WAF(.+)?"
+     }
+    ]
+   ]
+  },
+  "crawlprotect": {
+   "name": "CrawlProtect (Jean-Denis Brun)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^crawlprotecttag="
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "<title>crawlprotect"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "this site is protected by crawlprotect"
+     }
+    ]
+   ]
+  },
+  "ddosguard": {
+   "name": "DDoS-GUARD (DDOS-GUARD CORP.)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^__ddg1.*?="
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^__ddg2.*?="
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^__ddgid.*?="
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^__ddgmark.*?="
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "ddos-guard"
+     }
+    ]
+   ]
+  },
+  "distil": {
+   "name": "Distil (Distil Networks)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "cdn\\.distilnetworks\\.com/images/anomaly\\.detected\\.png"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "distilCaptchaForm"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "distilCallbackGuard"
+     }
+    ]
+   ]
+  },
+  "dosarrest": {
+   "name": "DOSarrest (DOSarrest Internet Security)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "X-DIS-Request-ID",
+      "re": ".+"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "DOSarrest(.*)?"
+     }
+    ]
+   ]
+  },
+  "dotdefender": {
+   "name": "DotDefender (Applicure Technologies)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "X-dotDefender-denied",
+      "re": ".+?"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "dotdefender blocked your request"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "Applicure is the leading provider of web application security"
+     }
+    ]
+   ]
+  },
+  "dynamicweb": {
+   "name": "DynamicWeb Injection Check (DynamicWeb)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "X-403-Status-By",
+      "re": "dw.inj.check"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "by dynamic check(.{0,10}?module)?"
+     }
+    ]
+   ]
+  },
+  "edgecast": {
+   "name": "Edgecast (Verizon Digital Media)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "^ECD(.+)?"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "^ECS(.*)?"
+     }
+    ]
+   ]
+  },
+  "eisoo": {
+   "name": "Eisoo Cloud Firewall (Eisoo)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "EisooWAF(\\-AZURE)?/?"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "<link.{0,10}?href=\\\"/eisoo\\-firewall\\-block\\.css"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "www\\.eisoo\\.com"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "&copy; \\d{4} Eisoo Inc"
+     }
+    ]
+   ]
+  },
+  "envoy": {
+   "name": "Envoy (EnvoyProxy)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "server",
+      "re": "envoy"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "x-envoy-upstream-service-time",
+      "re": ".+"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "x-envoy-downstream-service-cluster",
+      "re": ".+"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "x-envoy-downstream-service-node",
+      "re": ".+"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "x-envoy-external-address",
+      "re": ".+"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "x-envoy-force-trace",
+      "re": ".+"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "x-envoy-internal",
+      "re": ".+"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "x-envoy-original-dst-host",
+      "re": ".+"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "x-envoy-original-path",
+      "re": ".+"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "x-envoy-local-overloaded",
+      "re": ".+"
+     }
+    ]
+   ]
+  },
+  "expressionengine": {
+   "name": "Expression Engine (EllisLab)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^exp_track.+?="
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^exp_last_.+?="
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "invalid get data"
+     }
+    ]
+   ]
+  },
+  "f5bigipapm": {
+   "name": "BIG-IP AP Manager (F5 Networks)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^LastMRH_Session"
+     },
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^MRHSession"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^MRHSession"
+     },
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "Big([-_])?IP"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^F5_fullWT"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^F5_HT_shrinked"
+     }
+    ]
+   ]
+  },
+  "f5bigipasm": {
+   "name": "BIG-IP AppSec Manager (F5 Networks)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "the requested url was rejected"
+     },
+     {
+      "t": "body",
+      "re": "please consult with your administrator"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "TS[a-fA-F0-9]{8}=.+"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "TS[a-fA-F0-9]{6}=.+"
+     }
+    ]
+   ]
+  },
+  "f5bigipltm": {
+   "name": "BIG-IP Local Traffic Manager (F5 Networks)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^bigipserver"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "X-Cnection",
+      "re": "close"
+     }
+    ]
+   ]
+  },
+  "f5firepass": {
+   "name": "FirePass (F5 Networks)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^VHOST"
+     },
+     {
+      "t": "header",
+      "name": "Location",
+      "re": "\\/my\\.logon\\.php3"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^F5_fire.+?"
+     },
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^F5_passid_shrinked"
+     }
+    ]
+   ]
+  },
+  "f5trafficshield": {
+   "name": "Trafficshield (F5 Networks)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^ASINFO="
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "F5-TrafficShield"
+     }
+    ]
+   ]
+  },
+  "fastly": {
+   "name": "Fastly (Fastly CDN)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "X-Fastly-Request-ID",
+      "re": "\\w+"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "X-Served-By",
+      "re": "^cache-[a-z]{3}\\d+-[A-Z]{3}"
+     }
+    ]
+   ]
+  },
+  "fortigate": {
+   "name": "FortiGate (Fortinet)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "//globalurl.fortinet.net"
+     },
+     {
+      "t": "body",
+      "re": "FortiGate Application Control"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "Web Application Firewall"
+     },
+     {
+      "t": "body",
+      "re": "Event ID"
+     },
+     {
+      "t": "body",
+      "re": "//globalurl.fortinet.net"
+     }
+    ]
+   ]
+  },
+  "fortiguard": {
+   "name": "FortiGuard (Fortinet)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "FortiGuard Intrusion Prevention"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "//globalurl.fortinet.net"
+     }
+    ]
+   ]
+  },
+  "fortiweb": {
+   "name": "FortiWeb (Fortinet)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^FORTIWAFSID="
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": ".fgd_icon"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "fgd_icon"
+     },
+     {
+      "t": "body",
+      "re": "web.page.blocked"
+     },
+     {
+      "t": "body",
+      "re": "url"
+     },
+     {
+      "t": "body",
+      "re": "attack.id"
+     },
+     {
+      "t": "body",
+      "re": "message.id"
+     },
+     {
+      "t": "body",
+      "re": "client.ip"
+     }
+    ]
+   ]
+  },
+  "frontdoor": {
+   "name": "Azure Front Door (Microsoft)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "X-Azure-Ref",
+      "re": ".+?"
+     }
+    ]
+   ]
+  },
+  "gcparmor": {
+   "name": "Google Cloud App Armor (Google Cloud)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Via",
+      "re": "1.1 google"
+     }
+    ]
+   ]
+  },
+  "godaddy": {
+   "name": "GoDaddy Website Protection (GoDaddy)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "GoDaddy (security|website firewall)"
+     }
+    ]
+   ]
+  },
+  "greywizard": {
+   "name": "Greywizard (Grey Wizard)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "greywizard"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "<(title|h\\d{1})>Grey Wizard"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "contact the website owner or Grey Wizard"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "We.ve detected attempted attack or non standard traffic from your ip address"
+     }
+    ]
+   ]
+  },
+  "huaweicloud": {
+   "name": "Huawei Cloud Firewall (Huawei)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^HWWAFSESID="
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "HuaweiCloudWAF"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "hwclouds\\.com"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "hws_security@"
+     }
+    ]
+   ]
+  },
+  "hyperguard": {
+   "name": "HyperGuard (Art of Defense)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^WODSESSION="
+     }
+    ]
+   ]
+  },
+  "ibmdatapower": {
+   "name": "DataPower (IBM)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "X-Backside-Transport",
+      "re": "(OK|FAIL)"
+     }
+    ]
+   ]
+  },
+  "imunify360": {
+   "name": "Imunify360 (CloudLinux)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "imunify360.{0,10}?"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "protected.by.{0,10}?imunify360"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "powered.by.{0,10}?imunify360"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "imunify360.preloader"
+     }
+    ]
+   ]
+  },
+  "incapsula": {
+   "name": "Incapsula (Imperva Inc.)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^incap_ses.*?="
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^visid_incap.*?="
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "incapsula incident id"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "powered by incapsula"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "/_Incapsula_Resource"
+     }
+    ]
+   ]
+  },
+  "indusguard": {
+   "name": "IndusGuard (Indusface)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "IF_WAF"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "This website is secured against online attacks. Your request was blocked"
+     }
+    ]
+   ]
+  },
+  "instartdx": {
+   "name": "Instart DX (Instart Logic)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "X-Instart-Request-ID",
+      "re": ".+"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "X-Instart-Cache",
+      "re": ".+"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "X-Instart-WL",
+      "re": ".+"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "the requested url was rejected"
+     },
+     {
+      "t": "body",
+      "re": "please consult with your administrator"
+     },
+     {
+      "t": "body",
+      "re": "your support id is"
+     }
+    ]
+   ]
+  },
+  "isaserver": {
+   "name": "ISA Server (Microsoft)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "The.{0,10}?(isa.)?server.{0,10}?denied the specified uniform resource locator \\(url\\)"
+     }
+    ]
+   ]
+  },
+  "janusec": {
+   "name": "Janusec Application Gateway (Janusec)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "janusec application gateway"
+     }
+    ]
+   ]
+  },
+  "jiasule": {
+   "name": "Jiasule (Jiasule)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "jiasule\\-waf"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^jsl_tracking(.+)?="
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "__jsluid="
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "notice\\-jiasule"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "static\\.jiasule\\.com"
+     }
+    ]
+   ]
+  },
+  "kemp": {
+   "name": "Kemp LoadMaster (Progress Software)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "X-ServedBy",
+      "re": "KEMP-LM"
+     },
+     {
+      "t": "status",
+      "code": 403
+     },
+     {
+      "t": "body",
+      "re": "<title>403 Forbidden</title>"
+     }
+    ]
+   ]
+  },
+  "keycdn": {
+   "name": "KeyCDN (KeyCDN)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "KeyCDN"
+     }
+    ]
+   ]
+  },
+  "knownsec": {
+   "name": "KS-WAF (KnownSec)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "/ks[-_]waf[-_]error\\.png"
+     }
+    ]
+   ]
+  },
+  "kona": {
+   "name": "Kona SiteDefender (Akamai)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "AkamaiGHost"
+     }
+    ]
+   ]
+  },
+  "limelight": {
+   "name": "LimeLight CDN (LimeLight)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^limelight"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^l[mg]_sessid="
+     }
+    ]
+   ]
+  },
+  "link11": {
+   "name": "Link11 WAAP (Link11)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "server",
+      "re": "rhino-core-shield"
+     }
+    ]
+   ]
+  },
+  "litespeed": {
+   "name": "LiteSpeed (LiteSpeed Technologies)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "LiteSpeed"
+     },
+     {
+      "t": "status",
+      "code": 403
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "Proudly powered by litespeed web server"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "www\\.litespeedtech\\.com/error\\-page"
+     }
+    ]
+   ]
+  },
+  "malcare": {
+   "name": "Malcare (Inactiv)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "firewall.{0,15}?powered.by.{0,15}?malcare.{0,15}?pro"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "blocked because of malicious activities"
+     }
+    ]
+   ]
+  },
+  "maxcdn": {
+   "name": "MaxCDN (MaxCDN)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "X-CDN",
+      "re": "maxcdn"
+     }
+    ]
+   ]
+  },
+  "missioncontrol": {
+   "name": "Mission Control Shield (Mission Control)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "Mission Control Application Shield"
+     }
+    ]
+   ]
+  },
+  "modsecurity": {
+   "name": "ModSecurity (SpiderLabs)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "(mod_security|Mod_Security|NOYB)"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "This error was generated by Mod.?Security"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "rules of the mod.security.module"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "mod.security.rules triggered"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "Protected by Mod.?Security"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "/modsecurity[\\-_]errorpage/"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "modsecurity iis"
+     }
+    ]
+   ]
+  },
+  "naxsi": {
+   "name": "NAXSI (NBS Systems)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "X-Data-Origin",
+      "re": "^naxsi(.+)?"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "naxsi(.+)?"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "blocked by naxsi"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "naxsi blocked information"
+     }
+    ]
+   ]
+  },
+  "nemesida": {
+   "name": "Nemesida (PentestIt)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "@?nemesida(\\-security)?\\.com"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "Suspicious activity detected.{0,10}?Access to the site is blocked"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "nwaf@"
+     }
+    ]
+   ]
+  },
+  "netcontinuum": {
+   "name": "NetContinuum (Barracuda Networks)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^NCI__SessionId="
+     }
+    ]
+   ]
+  },
+  "netscaler": {
+   "name": "NetScaler AppFirewall (Citrix Systems)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Via",
+      "re": "NS\\-CACHE"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^(ns_af=|citrix_ns_id|NSC_)"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "(NS Transaction|AppFW Session) id"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "Violation Category.{0,5}?APPFW_"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "Citrix\\|NetScaler"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Cneonction",
+      "re": "^(keep alive|close)"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "nnCoection",
+      "re": "^(keep alive|close)"
+     }
+    ]
+   ]
+  },
+  "nevisproxy": {
+   "name": "NevisProxy (AdNovum)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^Navajo"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^NP_ID"
+     }
+    ]
+   ]
+  },
+  "newdefend": {
+   "name": "Newdefend (NewDefend)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "Newdefend"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "www\\.newdefend\\.com/feedback"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "/nd\\-block/"
+     }
+    ]
+   ]
+  },
+  "nexusguard": {
+   "name": "NexusGuard Firewall (NexusGuard)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "Powered by Nexusguard"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "nexusguard\\.com/wafpage/.+#\\d{3};"
+     }
+    ]
+   ]
+  },
+  "ninja": {
+   "name": "NinjaFirewall (NinTechNet)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "<title>NinjaFirewall.{0,10}?\\d{3}.forbidden"
+     },
+     {
+      "t": "body",
+      "re": "For security reasons?.{0,10}?it was blocked and logged"
+     }
+    ]
+   ]
+  },
+  "nsfocus": {
+   "name": "NSFocus (NSFocus Global Inc.)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "NSFocus"
+     }
+    ]
+   ]
+  },
+  "nullddos": {
+   "name": "NullDDoS Protection (NullDDoS)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "NullDDoS(.System)?"
+     }
+    ]
+   ]
+  },
+  "onmessage": {
+   "name": "OnMessage Shield (BlackBaud)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "X-Engine",
+      "re": "onMessage Shield"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "Blackbaud K\\-12 conducts routine maintenance"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "onMessage SHEILD"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "maintenance\\.blackbaud\\.com"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "status\\.blackbaud\\.com"
+     }
+    ]
+   ]
+  },
+  "openresty": {
+   "name": "Open-Resty Lua Nginx (FLOSS)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "^openresty/[0-9\\.]+?"
+     },
+     {
+      "t": "status",
+      "code": 403
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "openresty/[0-9\\.]+?"
+     },
+     {
+      "t": "status",
+      "code": 406
+     }
+    ]
+   ]
+  },
+  "oraclecloud": {
+   "name": "Oracle Cloud (Oracle)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "<title>fw_error_www"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "src=\\\"/oralogo_small\\.gif\\\""
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "www\\.oracleimg\\.com/us/assets/metrics/ora_ocom\\.js"
+     }
+    ]
+   ]
+  },
+  "paloalto": {
+   "name": "Palo Alto Next Gen Firewall (Palo Alto Networks)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "Download of virus.spyware blocked"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "Palo Alto Next Generation Security Platform"
+     }
+    ]
+   ]
+  },
+  "panyun360": {
+   "name": "360PanYun (360 Technologies)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "panyun"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "X-Panyun-Request-ID",
+      "re": ".+?"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "X-Panyun-Error-Reason",
+      "re": ".+?"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "X-Panyun-Error-Step",
+      "re": ".+?"
+     }
+    ]
+   ]
+  },
+  "pentawaf": {
+   "name": "PentaWAF (Global Network Services)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "PentaWaf(/[0-9\\.]+)?"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "Penta.?Waf/[0-9\\.]+?.server"
+     }
+    ]
+   ]
+  },
+  "perimeterx": {
+   "name": "PerimeterX (PerimeterX)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "www\\.perimeterx\\.(com|net)/whywasiblocked"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "client\\.perimeterx\\.(net|com)"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "denied because we believe you are using automation tools"
+     }
+    ]
+   ]
+  },
+  "pksec": {
+   "name": "pkSecurity IDS (pkSec)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "pk.?Security.?Module"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "Security.Alert"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "As this could be a potential hack attack"
+     },
+     {
+      "t": "body",
+      "re": "A safety critical (call|request) was (detected|discovered) and blocked"
+     },
+     {
+      "t": "body",
+      "re": "maximum number of reloads per minute and prevented access"
+     }
+    ]
+   ]
+  },
+  "powercdn": {
+   "name": "PowerCDN (PowerCDN)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Via",
+      "re": "(.*)?powercdn.com(.*)?"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "X-Cache",
+      "re": "(.*)?powercdn.com(.*)?"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "X-CDN",
+      "re": "PowerCDN"
+     }
+    ]
+   ]
+  },
+  "profense": {
+   "name": "Profense (ArmorLogic)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "Profense"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^PLBSID="
+     }
+    ]
+   ]
+  },
+  "ptaf": {
+   "name": "PT Application Firewall (Positive Technologies)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "<h1.{0,10}?Forbidden"
+     },
+     {
+      "t": "body",
+      "re": "<pre>Request.ID:.{0,10}?\\d{4}\\-(\\d{2})+.{0,35}?pre>"
+     }
+    ]
+   ]
+  },
+  "puhui": {
+   "name": "Puhui (Puhui)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "Puhui[\\-_]?WAF"
+     }
+    ]
+   ]
+  },
+  "qcloud": {
+   "name": "Qcloud (Tencent Cloud)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "腾讯云Web应用防火墙"
+     },
+     {
+      "t": "status",
+      "code": 403
+     }
+    ]
+   ]
+  },
+  "qiniu": {
+   "name": "Qiniu (Qiniu CDN)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "X-Qiniu-CDN",
+      "re": "\\d+?"
+     }
+    ]
+   ]
+  },
+  "qrator": {
+   "name": "Qrator (Qrator)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "QRATOR"
+     }
+    ]
+   ]
+  },
+  "radware": {
+   "name": "AppWall (Radware)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "CloudWebSec\\.radware\\.com"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "X-SL-CompState",
+      "re": ".+"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "because we have detected unauthorized activity"
+     },
+     {
+      "t": "body",
+      "re": "<title>Unauthorized Request Blocked"
+     },
+     {
+      "t": "body",
+      "re": "if you believe that there has been some mistake"
+     },
+     {
+      "t": "body",
+      "re": "\\?Subject=Security Page.{0,10}?Case Number"
+     }
+    ]
+   ]
+  },
+  "reblaze": {
+   "name": "Reblaze (Reblaze)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^rbzid"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "Reblaze Secure Web Gateway"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "current session has been terminated"
+     },
+     {
+      "t": "body",
+      "re": "do not hesitate to contact us"
+     },
+     {
+      "t": "body",
+      "re": "access denied \\(\\d{3}\\)"
+     }
+    ]
+   ]
+  },
+  "reflected": {
+   "name": "Reflected Networks (Reflected Networks)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "<img class=\"logo loader\" src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAbgAAABHCAIAAAD6G8WcAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyRpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw"
+     },
+     {
+      "t": "status",
+      "code": 403
+     },
+     {
+      "t": "body",
+      "re": "content=\"Request is denied\""
+     },
+     {
+      "t": "body",
+      "re": "<title>Forbidden</title>"
+     }
+    ]
+   ]
+  },
+  "rsfirewall": {
+   "name": "RSFirewall (RSJoomla!)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "com_rsfirewall_(\\d{3}_forbidden|event)?"
+     }
+    ]
+   ]
+  },
+  "rvmode": {
+   "name": "RequestValidationMode (Microsoft)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "Request Validation has detected a potentially dangerous client input"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "ASP\\.NET has detected data in the request"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "HttpRequestValidationException"
+     }
+    ]
+   ]
+  },
+  "sabre": {
+   "name": "Sabre Firewall (Sabre)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "dxsupport\\.sabre\\.com"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "<title>Application Firewall Error"
+     },
+     {
+      "t": "body",
+      "re": "add some important details to the email for us to investigate"
+     }
+    ]
+   ]
+  },
+  "safe3": {
+   "name": "Safe3 Web Firewall (Safe3)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "Safe3 Web Firewall"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "X-Powered-By",
+      "re": "Safe3WAF/[\\.0-9]+?"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "Safe3waf/[0-9\\.]+?"
+     }
+    ]
+   ]
+  },
+  "safedog": {
+   "name": "Safedog (SafeDog)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^safedog\\-flow\\-item="
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "Safedog"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "safedogsite/broswer_logo\\.jpg"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "404\\.safedog\\.cn/sitedog_stat.html"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "404\\.safedog\\.cn/images/safedogsite/head\\.png"
+     }
+    ]
+   ]
+  },
+  "safeline": {
+   "name": "Safeline (Chaitin Tech.)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "safeline|<!\\-\\-\\sevent id:"
+     }
+    ]
+   ]
+  },
+  "scutum": {
+   "name": "Scutum (Secure Sky Technology Inc.)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "Scutum"
+     }
+    ]
+   ]
+  },
+  "secking": {
+   "name": "SecKing (SecKing)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "secking(.?waf)?"
+     }
+    ]
+   ]
+  },
+  "secupress": {
+   "name": "SecuPress WP Security (SecuPress)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "<(title|h\\d{1})>SecuPress"
+     }
+    ]
+   ]
+  },
+  "secureentry": {
+   "name": "Secure Entry (United Security Providers)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "Secure Entry Server"
+     }
+    ]
+   ]
+  },
+  "secureiis": {
+   "name": "eEye SecureIIS (BeyondTrust)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "SecureIIS is an internet security application"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "Download SecureIIS Personal Edition"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "https?://www\\.eeye\\.com/Secure\\-?IIS"
+     }
+    ]
+   ]
+  },
+  "securesphere": {
+   "name": "SecureSphere (Imperva Inc.)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "<(title|h2)>Error"
+     },
+     {
+      "t": "body",
+      "re": "The incident ID is"
+     },
+     {
+      "t": "body",
+      "re": "This page can't be displayed"
+     },
+     {
+      "t": "body",
+      "re": "Contact support for additional information"
+     }
+    ]
+   ]
+  },
+  "senginx": {
+   "name": "SEnginx (Neusoft)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "SENGINX\\-ROBOT\\-MITIGATION"
+     }
+    ]
+   ]
+  },
+  "serverdefender": {
+   "name": "ServerDefender VP (Port80 Software)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "X-Pint",
+      "re": "p(ort\\-)?80"
+     }
+    ]
+   ]
+  },
+  "shadowd": {
+   "name": "Shadow Daemon (Zecure)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "<h\\d{1}>\\d{3}.forbidden<.h\\d{1}>"
+     },
+     {
+      "t": "body",
+      "re": "request forbidden by administrative rules"
+     }
+    ]
+   ]
+  },
+  "shieldon": {
+   "name": "Shieldon Firewall (Shieldon.io)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "Please solve CAPTCHA"
+     },
+     {
+      "t": "body",
+      "re": "shieldon_captcha"
+     },
+     {
+      "t": "body",
+      "re": "Unusual behavior detected"
+     },
+     {
+      "t": "body",
+      "re": "status-user-info"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "Access denied"
+     },
+     {
+      "t": "body",
+      "re": "The IP address you are using has been blocked."
+     },
+     {
+      "t": "body",
+      "re": "status-user-info"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "Please line up"
+     },
+     {
+      "t": "body",
+      "re": "This page is limiting the number of people online. Please wait a moment."
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "[Xx]-[Pp]rotected-[Bb]y",
+      "re": "shieldon.io"
+     }
+    ]
+   ]
+  },
+  "shieldsecurity": {
+   "name": "Shield Security (One Dollar Plugin)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "You were blocked by the Shield"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "remaining transgression\\(s\\) against this site"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "Something in the URL.{0,5}?Form or Cookie data wasn\\'t appropriate"
+     }
+    ]
+   ]
+  },
+  "siteground": {
+   "name": "SiteGround (SiteGround)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "Our system thinks you might be a robot!"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "access is restricted due to a security rule"
+     }
+    ]
+   ]
+  },
+  "siteguard": {
+   "name": "SiteGuard (EG Secure Solutions Inc.)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "Powered by SiteGuard"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "The server refuse to browse the page"
+     }
+    ]
+   ]
+  },
+  "sitelock": {
+   "name": "Sitelock (TrueShield)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "SiteLock will remember you"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "Sitelock is leader in Business Website Security Services"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "sitelock[_\\-]shield([_\\-]logo|[\\-_]badge)?"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "SiteLock incident ID"
+     }
+    ]
+   ]
+  },
+  "sonicwall": {
+   "name": "SonicWall (Dell)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "SonicWALL"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "<(title|h\\d{1})>Web Site Blocked"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "\\+?nsa_banner"
+     }
+    ]
+   ]
+  },
+  "sophos": {
+   "name": "UTM Web Protection (Sophos)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "www\\.sophos\\.com"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "Powered by.?(Sophos)? UTM Web Protection"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "<title>Access to the requested URL was blocked"
+     },
+     {
+      "t": "body",
+      "re": "Access to the requested URL was blocked"
+     },
+     {
+      "t": "body",
+      "re": "incident was logged with the following log identifier"
+     },
+     {
+      "t": "body",
+      "re": "Inbound Anomaly Score exceeded"
+     },
+     {
+      "t": "body",
+      "re": "Your cache administrator is"
+     }
+    ]
+   ]
+  },
+  "squarespace": {
+   "name": "Squarespace (Squarespace)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "Squarespace"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^SS_ANALYTICS_ID="
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^SS_MATTR="
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^SS_MID="
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "SS_CVT="
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "status\\.squarespace\\.com"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "BRICK\\-\\d{2}"
+     }
+    ]
+   ]
+  },
+  "squidproxy": {
+   "name": "SquidProxy IDS (SquidProxy)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "squid(/[0-9\\.]+)?"
+     },
+     {
+      "t": "body",
+      "re": "Access control configuration prevents your request"
+     }
+    ]
+   ]
+  },
+  "stackpath": {
+   "name": "StackPath (StackPath)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "<title>StackPath[^<]+</title>"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "Protected by <a href=\"https?:\\/\\/(?:www\\.)?stackpath\\.com\\/\"[^>]+>StackPath"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "is using a security service for protection against online attacks"
+     },
+     {
+      "t": "body",
+      "re": "An action has triggered the service and blocked your request"
+     }
+    ]
+   ]
+  },
+  "sucuri": {
+   "name": "Sucuri CloudProxy (Sucuri Inc.)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "X-Sucuri-ID",
+      "re": ".+?"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "X-Sucuri-Cache",
+      "re": ".+?"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "Sucuri(\\-Cloudproxy)?"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "X-Sucuri-Block",
+      "re": ".+?"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "Access Denied.{0,6}?Sucuri Website Firewall"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "<title>Sucuri WebSite Firewall.{0,6}?(CloudProxy)?.{0,6}?Access Denied"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "sucuri\\.net/privacy\\-policy"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "cdn\\.sucuri\\.net/sucuri[-_]firewall[-_]block\\.css"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "cloudproxy@sucuri\\.net"
+     }
+    ]
+   ]
+  },
+  "tencent": {
+   "name": "Tencent Cloud Firewall (Tencent Technologies)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "waf\\.tencent\\-?cloud\\.com/"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "window\\.location\\.href.{1,3}?https?://waf.tencent(?:-?cloud)?.com/(?:403|501)page\\.html"
+     }
+    ]
+   ]
+  },
+  "teros": {
+   "name": "Teros (Citrix Systems)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^st8id="
+     }
+    ]
+   ]
+  },
+  "threatx": {
+   "name": "ThreatX (A10 Networks)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "X-Request-Id",
+      "re": ".*"
+     },
+     {
+      "t": "body",
+      "re": "^Forbidden - ID: ([a-fA-F0-9]{32})$"
+     },
+     {
+      "t": "status",
+      "code": 403
+     }
+    ]
+   ]
+  },
+  "transip": {
+   "name": "TransIP Web Firewall (TransIP)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "X-TransIP-Backend",
+      "re": ".+"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "X-TransIP-Balancer",
+      "re": ".+"
+     }
+    ]
+   ]
+  },
+  "uewaf": {
+   "name": "UEWaf (UCloud)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "uewaf(/[0-9\\.]+)?"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "/uewaf_deny_pages/default/img/"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "ucloud\\.cn"
+     }
+    ]
+   ]
+  },
+  "urlmaster": {
+   "name": "URLMaster SecurityCheck (iFinity/DotNetNuke)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "X-UrlMaster-Debug",
+      "re": ".+"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "X-UrlMaster-Ex",
+      "re": ".+"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "Ur[li]RewriteModule"
+     },
+     {
+      "t": "body",
+      "re": "SecurityCheck"
+     }
+    ]
+   ]
+  },
+  "urlscan": {
+   "name": "URLScan (Microsoft)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "Rejected[-_]By[_-]UrlScan"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "A custom filter or module.{0,4}?such as URLScan"
+     }
+    ]
+   ]
+  },
+  "variti": {
+   "name": "Variti (Variti)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "Variti(?:\\/[a-z0-9\\.\\-]+)?"
+     }
+    ]
+   ]
+  },
+  "varnish": {
+   "name": "Varnish (OWASP)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "Request rejected by xVarnish\\-WAF"
+     }
+    ]
+   ]
+  },
+  "vercel": {
+   "name": "Vercel WAF (Vercel)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "<title>Vercel Security Checkpoint</title>"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "/vercel/security/"
+     }
+    ]
+   ]
+  },
+  "viettel": {
+   "name": "Viettel (Cloudrity)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "Access Denied.{0,10}?Viettel WAF"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "cloudrity\\.com\\.(vn)?/"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "Viettel WAF System"
+     }
+    ]
+   ]
+  },
+  "virusdie": {
+   "name": "VirusDie (VirusDie LLC)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "cdn\\.virusdie\\.ru/splash/firewallstop\\.png"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "copy.{0,10}?Virusdie\\.ru"
+     }
+    ]
+   ]
+  },
+  "wallarm": {
+   "name": "Wallarm (Wallarm Inc.)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "nginx[\\-_]wallarm"
+     }
+    ]
+   ]
+  },
+  "watchguard": {
+   "name": "WatchGuard (WatchGuard Technologies)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "WatchGuard"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "Request denied by WatchGuard Firewall"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "WatchGuard Technologies Inc\\."
+     }
+    ]
+   ]
+  },
+  "webarx": {
+   "name": "WebARX (WebARX Security Solutions)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "WebARX.{0,10}?Web Application Firewall"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "www\\.webarxsecurity\\.com"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "/wp\\-content/plugins/webarx/includes/"
+     }
+    ]
+   ]
+  },
+  "webknight": {
+   "name": "WebKnight (AQTRONIX)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "WebKnight Application Firewall Alert"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "What is webknight\\?"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "AQTRONIX WebKnight is an application firewall"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "WebKnight will take over and protect"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "aqtronix\\.com/WebKnight"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "AQTRONIX.{0,10}?WebKnight"
+     }
+    ]
+   ]
+  },
+  "webland": {
+   "name": "WebLand (WebLand)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "protected by webland"
+     }
+    ]
+   ]
+  },
+  "webray": {
+   "name": "RayWAF (WebRay Solutions)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "WebRay\\-WAF"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "DrivedBy",
+      "re": "RaySrv.RayEng/[0-9\\.]+?"
+     }
+    ]
+   ]
+  },
+  "webseal": {
+   "name": "WebSEAL (IBM)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "WebSEAL"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "This is a WebSEAL error message template file"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "WebSEAL server received an invalid HTTP request"
+     }
+    ]
+   ]
+  },
+  "webtotem": {
+   "name": "WebTotem (WebTotem)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "The current request was blocked.{0,8}?>WebTotem"
+     }
+    ]
+   ]
+  },
+  "west263cdn": {
+   "name": "West263 CDN (West263CDN)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "X-Cache",
+      "re": "WS?T263CDN"
+     }
+    ]
+   ]
+  },
+  "wordfence": {
+   "name": "Wordfence (Defiant)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "wf[_\\-]?WAF"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "Generated by Wordfence"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "broke one of (the )?Wordfence (advanced )?blocking rules"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "/plugins/wordfence"
+     }
+    ]
+   ]
+  },
+  "wpmudev": {
+   "name": "wpmudev WAF (Incsub)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "href=\"http(s)?.\\/\\/wpmudev.com\\/.{0,15}?"
+     },
+     {
+      "t": "body",
+      "re": "Click on the Logs tab, then the WAF Log."
+     },
+     {
+      "t": "body",
+      "re": "Choose your site from the list"
+     },
+     {
+      "t": "status",
+      "code": 403
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "<h1>Whoops, this request has been blocked!"
+     },
+     {
+      "t": "body",
+      "re": "This request has been deemed suspicious"
+     },
+     {
+      "t": "body",
+      "re": "possible attack on our servers."
+     },
+     {
+      "t": "status",
+      "code": 403
+     }
+    ]
+   ]
+  },
+  "wts": {
+   "name": "WTS-WAF (WTS)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "wts/[0-9\\.]+?"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "<(title|h\\d{1})>WTS\\-WAF"
+     }
+    ]
+   ]
+  },
+  "wzb360": {
+   "name": "360WangZhanBao (360 Technologies)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "qianxin\\-waf"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "WZWS-Ray",
+      "re": ".+?"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "X-Powered-By-360WZB",
+      "re": ".+?"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "wzws\\-waf\\-cgi/"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "wangshan\\.360\\.cn"
+     }
+    ]
+   ]
+  },
+  "xlabssecuritywaf": {
+   "name": "XLabs Security WAF (XLabs)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "X-CDN",
+      "re": "XLabs Security"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Secured",
+      "re": "^By XLabs Security"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "XLabs[-_]?.?WAF"
+     }
+    ]
+   ]
+  },
+  "xuanwudun": {
+   "name": "Xuanwudun (Xuanwudun)",
+   "rules": [
+    [
+     {
+      "t": "body",
+      "re": "admin\\.dbappwaf\\.cn/(index\\.php/Admin/ClientMisinform/)?"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "class=.(db[\\-_]?)?waf(.)?([\\-_]?row)?>"
+     }
+    ]
+   ]
+  },
+  "yundun": {
+   "name": "Yundun (Yundun)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "YUNDUN"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "X-Cache",
+      "re": "YUNDUN"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^yd_cookie="
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "Blocked by YUNDUN Cloud WAF"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "yundun\\.com/yd[-_]http[_-]error/"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "www\\.yundun\\.com/(static/js/fingerprint\\d{1}?\\.js)?"
+     }
+    ]
+   ]
+  },
+  "yunsuo": {
+   "name": "Yunsuo (Yunsuo)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^yunsuo_session="
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "class=\\\"yunsuologo\\\""
+     }
+    ]
+   ]
+  },
+  "yxlink": {
+   "name": "YXLink (YxLink Technologies)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^yx_ci_session="
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Set-Cookie",
+      "re": "^yx_language="
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "Yxlink([\\-_]?WAF)?"
+     }
+    ]
+   ]
+  },
+  "zenedge": {
+   "name": "Zenedge (Zenedge)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "ZENEDGE"
+     }
+    ],
+    [
+     {
+      "t": "header",
+      "name": "X-Zen-Fury",
+      "re": ".+?"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "/__zenedge/"
+     }
+    ]
+   ]
+  },
+  "zscaler": {
+   "name": "ZScaler (Accenture)",
+   "rules": [
+    [
+     {
+      "t": "header",
+      "name": "Server",
+      "re": "ZScaler"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "Access Denied.{0,10}?Accenture Policy"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "policies\\.accenture\\.com"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "login\\.zscloud\\.net/img_logo_new1\\.png"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "Zscaler to protect you from internet threats"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "Internet Security by ZScaler"
+     }
+    ],
+    [
+     {
+      "t": "body",
+      "re": "Accenture.{0,10}?webfilters indicate that the site likely contains"
+     }
+    ]
+   ]
+  }
+ }
+}
