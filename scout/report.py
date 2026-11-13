@@ -7,6 +7,7 @@ import socket
 import time
 import traceback
 
+from . import __version__
 from .config import EFFORT_BANDS
 
 SIZES = ["S", "M", "L", "XL"]
@@ -32,7 +33,10 @@ def protection(f: dict) -> list:
     if f.get("tls_impersonation"):
         ev.append(f"filters scripted clients ({f.get('blocked_plain_python', 'blocked')} to plain Python, "
                   "passes with a Chrome connection fingerprint)")
-    if f.get("unreachable") and f.get("browser_passes_block"):
+    if f.get("rules_forbid_start"):
+        method = "unknown"
+        why.append("the site's bot rules forbid this page, so nothing was fetched from it")
+    elif f.get("unreachable") and f.get("browser_passes_block"):
         ev.append("plain requests hang or drop while a real browser loads the page (tarpit)")
     elif f.get("browser_passes_block"):
         ev.append("blocks plain requests, lets a real browser in")
@@ -220,6 +224,14 @@ def claims(ctx, v) -> list:
     if f.get("browser_triggered_block"):
         add("A real browser can be used on this site", "broken",
             f"plain requests were blocked right after the browser visit ({f['browser_triggered_block']})")
+    # identity
+    ident = f.get("identity") or {}
+    if ident.get("honest_ok") is True:
+        add("Site accepts an honest bot identity", "verified", "SiteScout/%s user agent was served normally" % __version__)
+    elif ident.get("honest_ok") is False:
+        add("Site accepts an honest bot identity", "broken", ident.get("note", "site blocks honest bots"))
+    elif ident:
+        add("Site accepts an honest bot identity", "unknown", ident.get("note", ""))
     # robots
     if f.get("robots_allowed") is not None:
         add("robots.txt allows the start page", "verified" if f["robots_allowed"] else "broken")
@@ -258,6 +270,19 @@ def claims(ctx, v) -> list:
     return out
 
 
+def missing_extras() -> list:
+    """Checks that could not run because an optional extra is not installed - said plainly on the card."""
+    from importlib.util import find_spec
+    out = []
+    if find_spec("playwright") is None:
+        out.append("Real-browser checks not tested: Playwright is not installed "
+                   "(pip install site-scout[browser], then python -m playwright install chromium).")
+    if find_spec("curl_cffi") is None:
+        out.append("Browser-fingerprint (TLS) check not tested: curl_cffi is not installed "
+                   "(pip install site-scout[tls]).")
+    return out
+
+
 def _clean(obj):
     """Make findings JSON-safe (drop private keys / soup objects)."""
     if isinstance(obj, dict):
@@ -287,6 +312,7 @@ def write(ctx, elapsed: float) -> dict:
     except Exception as e:
         cl = [{"claim": "claims table failed", "evidence": "unknown", "detail": str(e)}]
     v["claims"] = cl
+    v["unknowns"] = list(v.get("unknowns") or []) + missing_extras()
     lines = []
     add = lines.append
     add(f"# Scout card - {ctx.host}")
@@ -294,6 +320,13 @@ def write(ctx, elapsed: float) -> dict:
     add(f"`{ctx.url}`  ")
     add(f"{time.strftime('%Y-%m-%d %H:%M')} - {ctx.fetcher.count} requests - {elapsed:.0f} s - "
         f"ran from `{socket.gethostname()}`{' via proxy' if ctx.cfg.proxy else ''}  ")
+    ident = f.get("identity") or {}
+    if ident.get("honest_ok") is False and ident.get("used") == "browser":
+        add("identity: browser - site blocks honest bots  ")
+    elif ctx.cfg.identity == "browser":
+        add("identity: browser (chosen with --identity browser)  ")
+    else:
+        add("identity: honest (SiteScout user agent)  ")
     if f.get("interrupted"):
         add(f"**Run was cut short: {f['interrupted']}** - findings below are partial.  ")
     add("")

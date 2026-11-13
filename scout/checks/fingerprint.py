@@ -41,6 +41,8 @@ class Fingerprint(Check):
 
     def run(self, ctx):
         r = ctx.main_page()
+        if r.error and ctx.facts.get("rules_forbid_start"):
+            raise SkipCheck("start page not requested - the site's bot rules forbid it")
         if r.error:
             ctx.facts["unreachable"] = r.error
             self.warn(f"Start page could not be loaded: {r.error}")

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from .base import Check
+from ..context import BOT_TOKEN
 
 try:
     # Scrapy's robots.txt parser: understands wildcards (*, $) and longest-match rules.
@@ -21,6 +22,12 @@ class Robots(Check):
     def run(self, ctx):
         url = ctx.origin + "/robots.txt"
         r = ctx.get(url, purpose="robots.txt")
+        if (r.status in (401, 403) or (r.blocked and r.status != 404)) and ctx.fetcher.identity == "honest"                 and ctx.cfg.identity == "honest":
+            # the site may simply refuse bot names: settle the identity first (one labelled
+            # comparison on the start page), then read robots.txt again with whatever works
+            ctx.main_page()
+            if ctx.fetcher.identity == "browser":
+                r = ctx.get(url, purpose="robots.txt (browser identity)", use_cache=False)
         out = {"url": url, "status": r.status, "found": False}
         if r.error:
             self.warn(f"Could not read robots.txt ({r.error}).")
@@ -45,19 +52,23 @@ class Robots(Check):
                       "which can misread wildcard rules. Run: pip install protego")
         out["found"] = True
 
-        allowed = rp.can_fetch("*", ctx.url)
+        allowed = ctx.allowed(ctx.url)   # our own name AND the wildcard; the stricter wins
         ctx.facts["robots_allowed"] = allowed
         out["start_url_allowed"] = allowed
         if allowed:
             self.note("The start page is allowed for bots.")
         else:
+            ctx.facts["rules_forbid_start"] = True
             self.warn("robots.txt DISALLOWS the start page for bots. Scraping it goes against the "
-                      "site's stated rules - discuss with the client before taking the job.")
+                      "site's stated rules - discuss with the client before taking the job. "
+                      "The scout did not request it.")
 
-        delay = rp.crawl_delay("*")
-        rate = rp.request_rate("*")
-        if rate:
-            delay = max(delay or 0, rate.seconds / max(rate.requests, 1))
+        delay = 0
+        for agent in (BOT_TOKEN, "*"):
+            delay = max(delay or 0, rp.crawl_delay(agent) or 0)
+            rate = rp.request_rate(agent)
+            if rate:
+                delay = max(delay, rate.seconds / max(rate.requests, 1))
         if delay:
             out["crawl_delay"] = float(delay)
             ctx.facts["crawl_delay"] = float(delay)

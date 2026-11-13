@@ -14,7 +14,7 @@ from urllib.parse import urlsplit
 
 import requests
 
-from .config import DEFAULT_HEADERS, ScoutConfig
+from .config import BROWSER_HEADERS, ScoutConfig, headers_for
 from . import signals
 
 _META_CHARSET = re.compile(rb"<meta[^>]+charset=[\"']?([A-Za-z0-9_\-]+)", re.I)
@@ -67,7 +67,9 @@ class PoliteFetcher:
         self.cfg = cfg
         self.host = host
         self.session = requests.Session()
-        self.session.headers.update(DEFAULT_HEADERS)
+        self.identity = "browser" if cfg.identity == "browser" else "honest"
+        self.session.headers.update(headers_for(self.identity))
+        self.deny = None               # optional callback: url -> reason string if bot rules forbid it
         if cfg.proxy:
             self.session.proxies = {"http": cfg.proxy, "https": cfg.proxy}
         self.count = 0
@@ -112,7 +114,7 @@ class PoliteFetcher:
             delay: float | None = None, use_cache: bool = True,
             allow_when_blocked: bool = False, plain_session: bool = False,
             method: str = "GET", data: str | None = None,
-            escalate: bool = True) -> Fetched:
+            escalate: bool = True, identity: str | None = None) -> Fetched:
         """escalate=False: a 401/403 here is expected (e.g. a feed needing a login)
         and should not trigger the global stop. 429/503/challenge pages always do."""
         cacheable = use_cache and not headers and not plain_session and method == "GET"
@@ -122,6 +124,10 @@ class PoliteFetcher:
         why_not = self.refusal(allow_when_blocked)
         if why_not:
             return Fetched(url=url, error=why_not)
+        if self.deny:
+            forbidden = self.deny(url)
+            if forbidden:
+                return Fetched(url=url, error=forbidden)
 
         self.wait_turn(delay)
         self.count += 1
@@ -170,6 +176,7 @@ class PoliteFetcher:
         self.log.append({
             "n": self.count, "url": url, "status": res.status, "bytes": res.size,
             "ms": round(res.elapsed_ms), "purpose": purpose,
+            "identity": identity or ("browser" if self.impersonating else self.identity),
             "blocked": res.blocked, "error": res.error,
         })
         if self.cfg.verbose:
@@ -195,6 +202,12 @@ class PoliteFetcher:
             return f"page shrank to {res.size:,} bytes from {good:,} (soft block)"
         return None
 
+    def switch_identity(self, identity: str):
+        """Every following request uses this identity (cookies are kept, cache is dropped)."""
+        self.identity = identity
+        self.session.headers.update(headers_for(identity))
+        self._cache.clear()
+
     def use_impersonation(self, target: str = "chrome") -> str | None:
         """Switch every following request to curl_cffi, which copies a real
         browser's connection fingerprint (some guards block Python's own).
@@ -202,13 +215,14 @@ class PoliteFetcher:
         try:
             from curl_cffi import requests as cffi
         except ImportError:
-            return "curl_cffi not installed (pip install curl_cffi)"
+            return "curl_cffi not installed (pip install site-scout[tls])"
         sess = cffi.Session(impersonate=target)
         if self.cfg.proxy:
             sess.proxies = {"http": self.cfg.proxy, "https": self.cfg.proxy}
         self.session.close()
         self.session = sess
         self.impersonating = target
+        self.identity = "browser"
         self._cache.clear()
         return None
 

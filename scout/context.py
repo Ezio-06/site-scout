@@ -9,9 +9,11 @@ from pathlib import Path
 from urllib.parse import urljoin, urlsplit
 
 from .browser import BrowserSession, BrowserUnavailable, Rendered
-from .config import ScoutConfig
+from .config import BROWSER_HEADERS, ScoutConfig
 from .fetcher import Fetched, PoliteFetcher
-from . import htmltools
+from . import htmltools, signals
+
+BOT_TOKEN = "SiteScout"   # the name robots.txt rules can address us by
 
 
 def _transient(err: str) -> bool:
@@ -33,6 +35,7 @@ class ScoutContext:
         self.host = parts.hostname or ""
         self.origin = f"{parts.scheme}://{parts.netloc}"
         self.fetcher = PoliteFetcher(cfg, self.host)
+        self.fetcher.deny = self._deny
         self.facts: dict = {}
         self.results: dict = {}
         self.robots = None                  # set by the robots check (start host)
@@ -63,10 +66,21 @@ class ScoutContext:
         rules = self.robots_for(url)
         if rules is None:
             return True
-        try:
-            return rules.can_fetch("*", url)
+        try:   # both names: our own token and the wildcard - the stricter answer wins
+            return rules.can_fetch(BOT_TOKEN, url) and rules.can_fetch("*", url)
         except Exception:
             return True
+
+    def _deny(self, url: str):
+        """Last line of defence inside the fetcher: never request a page of the start host
+        that its (already read) robots.txt forbids."""
+        parts = urlsplit(url)
+        if self.robots is None or (parts.hostname or "") != self.host or parts.path == "/robots.txt":
+            return None
+        if self.allowed(url):
+            return None
+        self.facts.setdefault("not_fetched_by_rules", []).append(url)
+        return "not fetched: the site's bot rules forbid this page"
 
     def robots_for(self, url: str):
         parts = urlsplit(url)
@@ -116,6 +130,49 @@ class ScoutContext:
             self.facts["start_retries"] = {"tries": tries, "recovered": r.error is None, "last_error": r.error}
         if r.error:
             self._main_fail[ident] = r
+        elif "identity_checked" not in self.scratch:
+            r = self._compare_identity(r)
+        return r
+
+    # ------------------------------------------------------------ identity
+    def _compare_identity(self, r: Fetched) -> Fetched:
+        """The scout starts honest. If the start page refuses that (block, error status, or a
+        stripped page), make exactly ONE labelled request with the Chrome identity. If that gets
+        in, the rest of the run uses Chrome and the card says so."""
+        self.scratch["identity_checked"] = True
+        f = self.fetcher
+        info = {"requested": self.cfg.identity, "used": f.identity}
+        self.facts["identity"] = info
+        if self.cfg.identity == "browser":
+            info["honest_ok"] = None
+            info["note"] = "browser identity chosen with --identity browser; honest identity not tested"
+            return r
+        thin = 200 <= r.status < 300 and signals.is_thin(r.text)
+        refused = bool(r.blocked) or r.status >= 400 or thin
+        if not refused:
+            info["honest_ok"] = True
+            return r
+        if f.remaining() < 1:
+            info["honest_ok"] = None
+            info["note"] = "honest identity refused; no request budget left for a comparison"
+            return r
+        c = f.get(self.url, purpose="main page (comparison: browser identity)", allow_when_blocked=True,
+                  use_cache=False, headers=BROWSER_HEADERS, identity="browser")
+        c_in = c.error is None and c.ok and not signals.is_thin(c.text)
+        if c_in:
+            f.switch_identity("browser")
+            f.blocked = None
+            f._cache[self.url] = c
+            if c.ok and not signals.is_thin(c.text):
+                f._good[self.url] = c.size
+            info.update(honest_ok=False, used="browser",
+                        note=f"honest identity refused ({r.blocked or 'HTTP ' + str(r.status)}); "
+                             f"browser identity gets in (HTTP {c.status})")
+            return c
+        # both refused (or the same stripped app shell) - the identity is not the difference
+        info["honest_ok"] = None if (r.blocked or r.status >= 400) else True
+        info["note"] = ("honest and browser identities got the same answer - identity is not the difference"
+                        if info["honest_ok"] else "honest and browser identities were both refused")
         return r
 
     def soup(self, key: str, html: str):
@@ -148,6 +205,8 @@ class ScoutContext:
             return self._rendered[url]
         if not self.browser_allowed():
             return None
+        if self._deny(url):
+            return None
         why_not = self.fetcher.refusal(allow_when_blocked)
         if why_not:
             self.facts.setdefault("browser_refused", why_not)
@@ -163,7 +222,8 @@ class ScoutContext:
             return None
         self.fetcher.log.append({"n": self.fetcher.count, "url": url, "status": r.status,
                                  "bytes": len(r.html), "ms": round(r.load_ms),
-                                 "purpose": "browser load", "blocked": None, "error": r.error})
+                                 "purpose": "browser load", "identity": "browser",
+                                 "blocked": None, "error": r.error})
         self._rendered[url] = r
         self._canary_after_browser()
         return r

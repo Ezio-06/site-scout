@@ -17,7 +17,7 @@ class BrowserIdentity(Check):
         try:
             import curl_cffi  # noqa: F401
         except ImportError:
-            return "curl_cffi not installed (pip install curl_cffi) - can't test this cheaper route"
+            return "curl_cffi not installed (pip install site-scout[tls]) - can't test this cheaper route"
         return None
 
     def run(self, ctx):

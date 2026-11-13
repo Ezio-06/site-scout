@@ -7,6 +7,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+from . import __version__
+
+REPO_URL = "https://github.com/Ezio-06/site-scout"
+# What the scout says about itself by default: an honest bot name plus where to read about it.
+HONEST_UA = f"SiteScout/{__version__} (+{REPO_URL})"
+
 # A normal desktop Chrome identity. Scrapers we build will use one of these,
 # so the scout should see the site the way our scraper will.
 BROWSER_UA = (
@@ -14,12 +20,18 @@ BROWSER_UA = (
     "(KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36"
 )
 
-DEFAULT_HEADERS = {
-    "User-Agent": BROWSER_UA,
+_COMMON_HEADERS = {
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     "Accept-Language": "en-US,en;q=0.9",
     "Accept-Encoding": "gzip, deflate",
 }
+HONEST_HEADERS = {"User-Agent": HONEST_UA, **_COMMON_HEADERS}
+BROWSER_HEADERS = {"User-Agent": BROWSER_UA, **_COMMON_HEADERS}
+DEFAULT_HEADERS = HONEST_HEADERS   # kept for old imports
+
+
+def headers_for(identity: str) -> dict:
+    return dict(BROWSER_HEADERS if identity == "browser" else HONEST_HEADERS)
 
 
 @dataclass
@@ -55,6 +67,7 @@ class ScoutConfig:
     expect: list = field(default_factory=list)  # text snippets the data should contain
 
     # --- plumbing ---
+    identity: str = "honest"        # honest (SiteScout UA, default) | browser (Chrome UA from the start)
     proxy: str | None = None
     out_dir: str | None = None
     only: list = field(default_factory=list)    # run only these checks

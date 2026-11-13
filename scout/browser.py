@@ -68,7 +68,7 @@ class BrowserSession:
             from playwright.sync_api import sync_playwright
         except ImportError as e:
             raise BrowserUnavailable(
-                "Playwright not installed. Run:  pip install playwright  then  "
+                "Playwright not installed. Run:  pip install site-scout[browser]  then  "
                 "python -m playwright install chromium") from e
         try:
             self._pw = sync_playwright().start()
