@@ -7,6 +7,7 @@ pushing back.
 """
 from __future__ import annotations
 
+import logging
 import re
 import time
 from dataclasses import dataclass, field
@@ -17,6 +18,7 @@ import requests
 from .config import BROWSER_HEADERS, ScoutConfig, headers_for
 from . import signals
 
+log = logging.getLogger("scout")
 _META_CHARSET = re.compile(rb"<meta[^>]+charset=[\"']?([A-Za-z0-9_\-]+)", re.I)
 
 
@@ -100,6 +102,7 @@ class PoliteFetcher:
     def note_block(self, reason: str):
         """Browser or checks can report a block found outside this fetcher."""
         if not self.blocked:
+            log.info("stopping further requests: %s", reason)
             self.blocked = reason
 
     def wait_turn(self, delay: float | None = None):
@@ -179,9 +182,8 @@ class PoliteFetcher:
             "identity": identity or ("browser" if self.impersonating else self.identity),
             "blocked": res.blocked, "error": res.error,
         })
-        if self.cfg.verbose:
-            print(f"    [{self.count:>3}] {res.status or 'ERR'} {res.size:>8}B "
-                  f"{res.elapsed_ms:>6.0f}ms  {purpose:<14} {url[:90]}")
+        log.debug("request %d: %s %sB %.0fms %s %s%s", self.count, res.status or "ERR", res.size,
+                  res.elapsed_ms, purpose or "-", url[:120], f" ({res.error})" if res.error else "")
         if cacheable and res.error is None:
             self._cache[url] = res
         return res

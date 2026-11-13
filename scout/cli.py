@@ -9,12 +9,14 @@ Examples
 from __future__ import annotations
 
 import argparse
+import logging
 import sys
 import time
 
 from scout import __version__
 from scout.checks import discover
 from scout.config import ScoutConfig
+from scout.logsetup import setup_console
 from scout.report import write
 from scout.runner import run_scout
 
@@ -42,7 +44,8 @@ def main(argv=None):
     p.add_argument("--only", help="comma-separated check names to run")
     p.add_argument("--skip", help="comma-separated check names to skip")
     p.add_argument("--list-checks", action="store_true", help="show available checks and exit")
-    p.add_argument("-v", "--verbose", action="store_true", help="print every request")
+    p.add_argument("-v", "--verbose", action="store_true", help="show DEBUG messages too (every request)")
+    p.add_argument("--quiet", action="store_true", help="console shows warnings only (scout.log still gets everything)")
     p.add_argument("--version", action="version", version=f"site-scout {__version__}")
     a = p.parse_args(argv)
 
@@ -53,7 +56,7 @@ def main(argv=None):
 
     if a.list_checks:
         for c in discover():
-            print(f"  {c.name:<12} {c.title}")
+            sys.stdout.write(f"  {c.name:<12} {c.title}\n")
         return 0
     if not a.url:
         p.error("url is required")
@@ -66,9 +69,13 @@ def main(argv=None):
         only=[s.strip() for s in (a.only or "").split(",") if s.strip()],
         skip=[s.strip() for s in (a.skip or "").split(",") if s.strip()],
     )
-    t0 = time.time()
-    ctx = run_scout(cfg)
-    v = write(ctx, time.time() - t0)
+    handler = setup_console(logging.DEBUG if a.verbose else logging.WARNING if a.quiet else logging.INFO)
+    try:
+        t0 = time.time()
+        ctx = run_scout(cfg)
+        v = write(ctx, time.time() - t0)
+    finally:
+        logging.getLogger("scout").removeHandler(handler)
 
     print()
     print(f"  METHOD : {v['tier']} - {v['method']} ({v['difficulty']})")
