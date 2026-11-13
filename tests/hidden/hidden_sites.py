@@ -28,7 +28,7 @@ ROBOTS_DISALLOW_SITESCOUT = (
 )
 
 
-def rich_page(title: str = "Garden tools") -> str:
+def rich_page(title: str = "Garden tools", next_href: str = "") -> str:
     cards = "".join(
         f'<li class="product"><a href="/item/{i}"><h3>Garden tool model {i}</h3></a>'
         f'<p class="desc">Sturdy steel tool number {i} with an ash handle, made for daily use in '
@@ -38,7 +38,9 @@ def rich_page(title: str = "Garden tools") -> str:
                   ("spades", "rakes", "hoes", "shears", "gloves", "pots", "seeds", "soil"))
     return (f"<!doctype html><html><head><title>{title}</title></head><body>"
             f"<nav>{nav}</nav><main><h1>{title}</h1><p>Showing 24 products.</p>"
-            f"<ul class='results'>{cards}</ul></main><footer>Local test shop</footer></body></html>")
+            f"<ul class='results'>{cards}</ul>"
+            + (f'<a rel="next" class="next" href="{next_href}">Next page</a>' if next_href else "")
+            + f"</main><footer>Local test shop</footer></body></html>")
 
 
 APP_SHELL = ('<!doctype html><html><head><title>App</title>'
@@ -103,8 +105,8 @@ class FakeSite:
                 return 404, "not found", "text/plain"
             if "sitescout" in ua.lower():
                 return 403, "<html><body>Forbidden</body></html>", html
-            if path == "/list":
-                return 200, rich_page(), html
+            if path == "/list":   # page-2 link so the run has a later fetch that must use Chrome
+                return 200, rich_page(next_href="/list?page=2"), html
             return 404, "<html><body>not found</body></html>", html
 
         if path == "/robots.txt":
